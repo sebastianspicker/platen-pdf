@@ -4,6 +4,13 @@ This file records public-facing changes to Platen. The project follows
 semantic versioning for release identifiers, but alpha releases may change
 interfaces and output contracts without backward compatibility.
 
+## Development paused (2026-10-14)
+
+- Paused product development until further notice in favor of
+  [PdfCraft](https://github.com/storytold/pdfcraft), a working product built
+  around almost the same idea. The repository remains available for reference.
+- The `0.3.0-alpha.1` candidate will not be published.
+
 ## 0.3.0-alpha.1
 
 Release status: candidate, not published.

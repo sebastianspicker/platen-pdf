@@ -1,5 +1,10 @@
 # Contributing
 
+Platen is paused until further notice (see the [README](README.md)), so new
+features and pull requests are not being reviewed. Consider contributing to
+[PdfCraft](https://github.com/storytold/pdfcraft) instead. The rules below
+document how the project was maintained.
+
 Platen separates verified host and engine behavior from research-only
 catalog entries. Keep that boundary explicit in code, catalog data, tests, and
 documentation.

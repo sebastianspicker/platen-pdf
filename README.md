@@ -1,14 +1,22 @@
 # Platen
 
+> [!NOTE]
+> **Development paused.** [PdfCraft](https://github.com/storytold/pdfcraft)
+> follows almost the same idea and is a working product, whereas Platen is
+> still a prototype. Until further notice I will not develop Platen further as
+> a product; if you need a working tool, use PdfCraft. This repository stays
+> available as-is for reference. I enjoyed the ride nonetheless.
+
 Platen is a local-first PDF workbench with a browser UI, a CLI, and a
 token-authenticated loopback host. It keeps source documents immutable and
 produces separately validated derived artifacts. Processing uses fixed local
 adapters and optional native helpers; it does not upload documents or download
 engines at runtime.
 
-`0.3.0-alpha.1` is a public-alpha candidate, not a published release. Interfaces,
-output contracts, and capability classifications can change. Use independent
-review before relying on any output in unattended or production work.
+`0.3.0-alpha.1` is a public-alpha candidate and, with development paused, will
+not be published as a release. Interfaces, output contracts, and capability
+classifications are unstable. Use independent review before relying on any
+output in unattended or production work.
 
 ## Scope and limits
 
