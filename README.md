@@ -1,11 +1,5 @@
 # Platen
 
-> [!NOTE]
-> **Development paused.** [PdfCraft](https://github.com/storytold/pdfcraft)
-> follows almost the same idea and is a working product, whereas Platen is
-> still a prototype. Until further notice I will not develop Platen further as
-> a product; if you need a working tool, use PdfCraft. This repository stays
-> available as-is for reference. I enjoyed the ride nonetheless.
 
 Platen is a local-first PDF workbench with a browser UI, a CLI, and a
 token-authenticated loopback host. It keeps source documents immutable and
@@ -13,10 +7,38 @@ produces separately validated derived artifacts. Processing uses fixed local
 adapters and optional native helpers; it does not upload documents or download
 engines at runtime.
 
+<details>
+<summary>Status and limitations</summary>
+
+**Development paused; independent prototype.** I developed Platen independently
+alongside my main professional work. It remains a prototype and a starting point for
+adaptation, rather than a ready-to-use PDF product.
+[PdfCraft](https://github.com/storytold/pdfcraft) follows almost the same idea and is
+a working product; if you need a working tool, use PdfCraft. Until further notice I
+will not develop Platen further as a product. This repository stays available as-is
+for reference. I enjoyed the ride nonetheless.
+
+**Disclaimer.** Review and validate derived documents before relying on them. The
+capability and validation limits below still apply, including those for accessibility,
+prepress and signatures. You are responsible for judging the output's suitability for
+your use.
+
+</details>
+
 `0.3.0-alpha.1` is a public-alpha candidate and, with development paused, will
 not be published as a release. Interfaces, output contracts, and capability
 classifications are unstable. Use independent review before relying on any
 output in unattended or production work.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Source[Original PDF remains unchanged] --> Entry[Browser or command line]
+    Entry --> Local[Local application services and adapters]
+    Local --> Derived[Separate derived document]
+    Derived --> Review[Validation report and human review]
+```
 
 ## Scope and limits
 
