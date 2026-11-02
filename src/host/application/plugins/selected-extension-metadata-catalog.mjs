@@ -6,6 +6,7 @@ import {
   SEMVER,
   SHA256,
 } from './plugin-package-contract.mjs';
+import { deepFreeze } from '../../../contracts/deep-freeze.js';
 
 const CATALOG_SCHEMA_VERSION = 1;
 const CATALOG_KIND = 'selected-extension-metadata-catalog';
@@ -24,12 +25,6 @@ function assertAuthority(authority) {
     || typeof authority.listPlugins !== 'function' || typeof authority.getSelectedPackage !== 'function') {
     fail('PLUGIN_SELECTED_METADATA_CATALOG_AUTHORITY_MISSING', 'Plugin catalog authority must expose listPlugins() and getSelectedPackage().', 503);
   }
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 function dataRecord(value, fields, code, message, { exact = true, status = 500 } = {}) {

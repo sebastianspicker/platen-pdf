@@ -1,8 +1,8 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary, pdfReference } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, parsePdfStructure, resolveClassicPdfObject, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { resolvePdfPageTree } from './pdf-page-tree-resolver.mjs';
 import { PDF_SPECIALIST_CONTENT_PROFILE, normalizePdfSpecialistContent } from './pdf-specialist-content-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export { PDF_SPECIALIST_CONTENT_PROFILE };
 export const PDF_SPECIALIST_CONTENT_LIMITS = Object.freeze({ maxSourceBytes: 64 * 1024 * 1024, maxPages: 1_000, maxObjects: 50_000, maxDepth: 16, maxStreams: 4_000, maxAggregateStreamBytes: 64 * 1024 * 1024 });
@@ -11,7 +11,6 @@ const SAFE_UNITS = new Set(['pt', 'in', 'cm', 'mm', 'm', 'km', 'ft', 'yd', 'mi',
 function fail(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the bounded specialist-content inspection subset.') { return fail('UNSUPPORTED_PDF_SPECIALIST_CONTENT', message); }
 function invalidOutput(message = 'PDF specialist-content inventory proof failed.') { return fail('INVALID_PDF_SPECIALIST_CONTENT_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function refKey(ref) { return `${ref.object}:${ref.generation}`; }
 function dict(value) { try { return pdfDictionary(value); } catch { throw unsupported('Malformed dictionary encountered during specialist-content inspection.'); } }
 function asRef(value) { try { return pdfReference(value); } catch { throw unsupported('Malformed object reference encountered during specialist-content inspection.'); } }

@@ -10,6 +10,7 @@ import { visitPdfObjects } from '../pdf/pdf-structure-inspection.mjs';
 import { inspectPassiveCopyGraph } from '../pdf/pdf-copy-page-passive-graph.mjs';
 import { OUTPUT_INTENT_LABEL } from './output-intent-contract.mjs';
 import { CMYK_CONVERSION_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_SOURCE_BYTES = 256 * 1024 * 1024;
 const MAX_PROFILE_BYTES = 4 * 1024 * 1024;
@@ -22,7 +23,6 @@ const METADATA_KEYS = new Set(['Metadata', 'PieceInfo', 'LastModified', 'ModDate
 const OPTIONAL_KEYS = new Set(['OC', 'OCGs', 'OCProperties']);
 const FORM_KEYS = new Set(['AcroForm', 'XFA', 'FT', 'Kids']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The PDF is outside the bounded OutputIntent assignment subset.') {
   throw failure('UNSUPPORTED_OUTPUT_INTENT_PDF', message);
 }

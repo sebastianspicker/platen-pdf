@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const PDF_JAVASCRIPT_REMOVAL_PROFILE = 'local-document-javascript-removal-v1';
 export const PDF_JAVASCRIPT_REMOVAL_LIMITATIONS = Object.freeze([
@@ -19,11 +20,6 @@ const EVIDENCE_KEYS = Object.freeze([
   'pageTextMatched', 'pageBoxesMatched', 'pageValidationRendersMatched',
   'outputUnsigned', 'artifactDigestBound', 'sourceUnchanged', 'localOnly',
 ]);
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
-}
 
 function validArtifact(artifact, context) {
   return exactObject(artifact, [

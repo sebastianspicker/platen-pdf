@@ -1,18 +1,17 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary, serializePdfValue } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { normalizePdfAccessibilityFormSemantics, PDF_ACCESSIBILITY_FORM_SEMANTICS_PROFILE } from './pdf-accessibility-form-semantics-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const ACTIVE = new Set(['A', 'AA', 'OpenAction', 'JavaScript', 'JS', 'Launch', 'URI', 'SubmitForm', 'ResetForm', 'ImportData', 'XFA', 'StructTreeRoot', 'Metadata', 'OCProperties', 'OC', 'OCGs', 'Layer', 'Perms', 'Outlines', 'Names', 'AF', 'EmbeddedFiles', 'RichMediaContent', 'Sound', 'Movie', 'ByteRange', 'Reference', 'TransformMethod']);
 const TYPES = new Set(['Sig', 'DocTimeStamp']);
 const FT = Object.freeze({ text: 'Tx', button: 'Btn', choice: 'Ch' });
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The source is outside the passive accessible-form semantics subset.') { throw failure('UNSUPPORTED_PDF_ACCESSIBILITY_FORM_SEMANTICS', message); }
 function invalid(message = 'The accessible-form semantics request is invalid.') { throw failure('INVALID_PDF_ACCESSIBILITY_FORM_SEMANTICS', message); }
 function outputInvalid(message = 'The accessible-form semantics output failed independent verification.') { throw failure('INVALID_PDF_ACCESSIBILITY_FORM_SEMANTICS_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function ref(value) { if (value?.type !== 'ref') unsupported('Indirect references are required.'); return { type: 'ref', object: value.object, generation: value.generation }; }
 function sameRef(a, b) { return a?.object === b?.object && a?.generation === b?.generation; }
 function name(value) { return Object.freeze({ type: 'name', value }); }

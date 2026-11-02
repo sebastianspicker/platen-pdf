@@ -15,6 +15,7 @@ import {
 } from './plugin-package-codec.mjs';
 import { validatePluginPackageManifest } from './plugin-package-manifest-validation.mjs';
 import { TrustedPublisherStore } from '../security/trusted-publisher-store.mjs';
+import { deepFreeze } from '../../../contracts/deep-freeze.js';
 
 export { PACKAGE_LIMITS } from './plugin-package-contract.mjs';
 export {
@@ -23,12 +24,6 @@ export {
   sha256,
 } from './plugin-package-codec.mjs';
 export { TrustedPublisherStore } from '../security/trusted-publisher-store.mjs';
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
-}
 
 function validateSignature(pluginPackage, trustedPublishers) {
   assertExactKeys(pluginPackage.signature, SIGNATURE_FIELDS, 'Plugin signature');

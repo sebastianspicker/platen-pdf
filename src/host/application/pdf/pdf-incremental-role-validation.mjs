@@ -1,14 +1,11 @@
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { resolvePdfObject } from './pdf-classic-structure.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
 
 function invalid() {
   const error = new Error('The incremental PDF role objects are invalid.');
   error.code = 'INVALID_INCREMENTAL_ROLE_OBJECTS';
   return error;
-}
-
-function sameReference(left, right) {
-  return left.object === right.object && left.generation === right.generation;
 }
 
 function roleObject(structure, records, objects, reference) {

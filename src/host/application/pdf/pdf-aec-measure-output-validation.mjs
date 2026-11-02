@@ -1,10 +1,7 @@
 import { createHash } from 'node:crypto';
 import { pdfInteger, serializePdfValue } from './pdf-classic-syntax.mjs';
 import { resolvePdfObject } from './pdf-classic-structure.mjs';
-
-function sameReference(left, right) {
-  return left.object === right.object && left.generation === right.generation;
-}
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
 
 export function invalidAecMeasureOutput() {
   const error = new Error('The incremental AEC measure-dictionary output proof failed.');

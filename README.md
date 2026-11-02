@@ -121,7 +121,8 @@ when the helper is absent; other local adapters remain independent.
 ├── src/cli/       CLI parser, commands, facade use, and output publication
 ├── src/contracts/ Neutral runtime contracts and validation
 ├── src/host/      Layered local host: root, bootstrap, transport, application, platform
-├── tools/         Verification, reporting, quality, and release utilities
+├── tests/         Contract and integration tests
+├── tools/         Test, verification, reporting, quality, and release utilities
 ├── index.html
 └── package.json
 ```
@@ -129,7 +130,8 @@ when the helper is absent; other local adapters remain independent.
 ## Development and verification
 
 ```sh
-npm run verify           # repository verification
+npm test                 # discover and run tests under tests/
+npm run verify           # repository verification and full Node suite
 npm run check:professional-clones
 npm run report           # summarize the capability catalogs
 npm run release:validate # produce a local inventory receipt

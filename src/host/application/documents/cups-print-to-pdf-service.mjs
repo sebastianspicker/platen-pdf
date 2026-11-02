@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -10,6 +9,7 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance, validateOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { parsePageDimensions, parsePdfInfo, parseTextPages } from '../pdf/pdf-evidence-parsers.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_CUPS_TEXT_INPUT_BYTES = 8 * 1024 * 1024;
 export const MAX_CUPS_PDF_BYTES = 64 * 1024 * 1024;
@@ -22,7 +22,6 @@ const SHORT_IDENTITY_KEYS = Object.freeze(['dev', 'ino', 'size', 'mtimeNs', 'cti
 
 function invalid(code, message, status = 422, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 function cancelled(signal) { if (signal?.aborted) { const error = new Error('CUPS text-to-PDF conversion was cancelled.'); error.code = 'ENGINE_CANCELLED'; throw error; } }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameIdentity(left, right) { return SHORT_IDENTITY_KEYS.every((key) => left[key] === right[key]); }
 function shortIdentity(metadata) { return Object.freeze(Object.fromEntries(SHORT_IDENTITY_KEYS.map((key) => [key, metadata[key]]))); }
 function text(bytes) {

@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { chmod, lstat, open, readFile, readdir, unlink } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
@@ -10,6 +9,7 @@ import { createOperationProvenance } from '../../platform/storage/operation-prov
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { normalizePdfTextEditRequest, PDF_TEXT_EDIT_PROFILE } from './pdf-text-edit-contract.mjs';
 import { inspectPdfTextEdit, writePdfTextEdit } from './pdf-text-edit-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_JOB_MS = 120_000;
 const MAX_SOURCE_BYTES = 256 * 1024 * 1024;
@@ -27,7 +27,6 @@ function host(code, message, status = 502, cause) {
   return new HostError(code, message, status, cause ? { cause } : undefined);
 }
 function fail(code, message, status = 502, cause) { throw host(code, message, status, cause); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function checkedSignal(signal) {
   if (signal !== undefined && !(signal instanceof AbortSignal)) throw new TypeError('signal must be an AbortSignal.');
 }

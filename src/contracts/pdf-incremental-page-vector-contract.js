@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const INCREMENTAL_PAGE_VECTOR_PROFILE = 'local-incremental-page-vector-v1';
 export const INCREMENTAL_PAGE_VECTOR_VALIDATORS = Object.freeze([
@@ -67,11 +68,6 @@ function validOperation(operation, artifact, context) {
     && sameList(operation.validation.validators, INCREMENTAL_PAGE_VECTOR_VALIDATORS)
     && operation.validation.pageCount === operation.expected.pageCount
     && operation.validation.outputSha256 === artifact.sha256;
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 function validArtifact(artifact, context) {

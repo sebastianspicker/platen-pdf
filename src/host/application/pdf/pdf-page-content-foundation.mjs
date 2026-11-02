@@ -10,6 +10,7 @@ import { pendingPdfObjectReference, planPdfObjectTransaction } from './pdf-class
 import { verifyPdfIncrementalRevision } from './pdf-classic-incremental-revision.mjs';
 import { tokenizePdfContentStream, PDF_CONTENT_STREAM_LIMITS } from './pdf-content-stream-tokenizer.mjs';
 import { resolvePdfPageTree } from './pdf-page-tree-resolver.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
 
 export const PDF_PAGE_CONTENT_FOUNDATION_PROFILE = 'local-page-content-foundation-v1';
 export const PDF_PAGE_CONTENT_FOUNDATION_LIMITS = Object.freeze({
@@ -45,7 +46,6 @@ function invalidOutput(message = 'Page-content foundation output proof failed.')
 }
 function sha256(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameReference(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 function exactObject(value, required, optional = []) {
   if (!value || typeof value !== 'object' || Array.isArray(value)
     || Object.getPrototypeOf(value) !== Object.prototype) throw invalid();

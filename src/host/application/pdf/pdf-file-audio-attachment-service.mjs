@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { chmod, lstat, open, readFile, unlink } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
@@ -14,6 +13,8 @@ import {
   inspectPdfFileAudioAttachment,
   writePdfFileAudioAttachment,
 } from './pdf-file-audio-attachment-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const MAX_SOURCE_BYTES = 128 * 1024 * 1024;
@@ -26,8 +27,6 @@ const STORE_METHODS = Object.freeze([
 const INPUT_METHODS = Object.freeze(['getInput', 'getSourcePath', 'verifyInput']);
 
 function host(code, message, status = 502, cause) { return new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
-function overlap(left, right) { return left.buffer === right.buffer && left.byteOffset < right.byteOffset + right.byteLength && right.byteOffset < left.byteOffset + left.byteLength; }
 function cancelled(signal) { if (signal?.aborted) throw host('JOB_CANCELLED', 'File/audio attachment processing was cancelled.', 499); }
 
 async function readStableAsset(inputs, request, signal) {

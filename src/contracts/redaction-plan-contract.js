@@ -1,4 +1,5 @@
 import { normalizedRectangle } from './normalized-rectangle.js';
+import { exactObject } from './exact-object.js';
 
 export const SOURCE_BOUND_REDACTION_PLAN_PROFILE = 'source-bound-redaction-plan-v1';
 export const SOURCE_BOUND_REDACTION_APPLICATION_PROFILE = 'source-bound-redaction-application-v1';
@@ -7,13 +8,6 @@ export const VERIFIED_RASTER_BURN_PROFILE = 'verified-raster-burn-v2';
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
-
-function exactObject(value, keys) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-    && Object.keys(value).length === keys.length
-    && Object.keys(value).every((key) => keys.includes(key));
-}
 
 function digest(value, label) {
   if (!SHA256.test(value ?? '')) throw new TypeError(`${label} must be a lowercase SHA-256 digest.`);

@@ -10,6 +10,7 @@ import {
   PDF_ACCESSIBILITY_LINKS_BOOKMARKS_PROFILE,
   normalizePdfAccessibilityLinksBookmarks,
 } from './pdf-accessibility-links-bookmarks-contract.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_PAGES = 100;
 const MAX_PAGE_TREE_DEPTH = 16;
@@ -28,7 +29,6 @@ const UNSAFE_KEYS = new Set([
 ]);
 const UNSAFE_TYPES = new Set(['Action', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the supported accessibility links/bookmarks subset.') { return failure('UNSUPPORTED_ACCESSIBILITY_LINKS_BOOKMARKS_PDF', message); }
 function invalidOutput(message = 'Accessibility links/bookmarks output proof failed.') { return failure('INVALID_ACCESSIBILITY_LINKS_BOOKMARKS_OUTPUT', message); }
 function sameReference(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }

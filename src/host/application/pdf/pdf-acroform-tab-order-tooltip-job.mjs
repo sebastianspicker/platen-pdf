@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -10,6 +9,7 @@ import {
   preparePdfAcroFormTabOrderTooltip,
   PDF_ACROFORM_TAB_ORDER_TOOLTIP_PROFILE,
 } from './pdf-acroform-tab-order-tooltip-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACROFORM_TAB_ORDER_TOOLTIP_JOB_MS = 120_000;
 export const MAX_PDF_ACROFORM_TAB_ORDER_TOOLTIP_SOURCE_BYTES = 32 * 1024 * 1024;
@@ -18,7 +18,6 @@ const SOURCE_MODE = 0o400;
 const OUTPUT_MODE = 0o600;
 
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function identity(left, right) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => left[key] === right[key]); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'AcroForm tab-order and tooltip processing was cancelled.', 499, signal.reason); }
 async function assertWorkspace(directory, expected) {

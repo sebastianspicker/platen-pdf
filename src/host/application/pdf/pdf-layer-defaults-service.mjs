@@ -14,6 +14,7 @@ import {
   inspectPdfLayerDefaults,
   writePdfLayerDefaults,
 } from './pdf-layer-defaults-writer.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const MAX_JOB_MS = 2 * 60_000;
@@ -80,12 +81,6 @@ function checkedRequest(core, value, sourceSha256) {
 
 function throwIfAborted(signal) {
   if (signal.aborted) throw signal.reason ?? new Error('PDF layer-defaults processing was cancelled.');
-}
-
-function overlap(left, right) {
-  return left.buffer === right.buffer
-    && left.byteOffset < right.byteOffset + right.byteLength
-    && right.byteOffset < left.byteOffset + left.byteLength;
 }
 
 function assertProof(proof, sourceLength, outputLength, request) {

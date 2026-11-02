@@ -3,6 +3,7 @@ import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { VERAPDF_SUPPORTED_VERSION } from '../../platform/adapters/verapdf-contract.mjs';
+import { sameIdentity } from '../../platform/runtime/file-identity.mjs';
 
 export { VERAPDF_SUPPORTED_VERSION } from '../../platform/adapters/verapdf-contract.mjs';
 export const VERAPDF_BUNDLE_MANIFEST = 'verapdf-bundle.json';
@@ -37,11 +38,6 @@ function exactObject(value, keys) {
   return value && typeof value === 'object' && !Array.isArray(value)
     && Object.getPrototypeOf(value) === Object.prototype
     && Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
-}
-
-function sameIdentity(left, right) {
-  return left.dev === right.dev && left.ino === right.ino && left.size === right.size
-    && left.mtimeNs === right.mtimeNs && left.ctimeNs === right.ctimeNs;
 }
 
 function safeComponentMetadata(metadata, { launcher = false } = {}) {

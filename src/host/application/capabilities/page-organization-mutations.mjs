@@ -156,12 +156,6 @@ export async function pagesTransitions(ctx = {}) {
   }, 'pages.transitions', 'source-bound-incremental-dissolve-transition', { pages: transitionPages, transition, duration });
 }
 
-function unsupportedCapability(capabilityId, message) {
-  return async () => fail('PAGES_CAPABILITY_UNSUPPORTED', message, 422);
-}
-
-export const pagesResize = unsupportedCapability('pages.resize', 'Validated page resizing with content placement is unavailable.');
-
 function generatedBlankId(value) {
   return value?.documentId ?? value?.document?.id ?? value?.artifact?.documentId ?? value?.id ?? null;
 }

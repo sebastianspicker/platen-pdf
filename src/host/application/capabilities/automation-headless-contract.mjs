@@ -1,4 +1,3 @@
-import { createHash, randomUUID } from 'node:crypto';
 import { types as nodeTypes } from 'node:util';
 import {
   canonicalWatchDirectory,
@@ -26,20 +25,12 @@ import { AutomationJsRecipeRegistry } from '../automation/automation-js-registry
 import { HostError } from '../../platform/runtime/host-error.mjs';
 import { result, fail, requireString } from './support.mjs';
 
-function digestSeed(type, seed) {
-  return createHash('sha256').update(`${type}|${String(seed ?? randomUUID())}`).digest('hex').slice(0, 32);
-}
-
 const API_OPERATIONS = Object.freeze(new Set([
   'compose', 'split', 'compress', 'export', 'preflight', 'print', 'ocr', 'merge',
 ]));
 
 const SEQUENCE_OPS = Object.freeze(new Set([
   'open', 'compress', 'save', 'export', 'merge', 'split', 'watermark', 'encrypt', 'ocr',
-]));
-
-const PREFLIGHT_PROFILES = Object.freeze(new Set([
-  'print-review', 'web-optimize', 'pdfa-2b', 'accessibility-lite', 'archive',
 ]));
 
 const AUTOMATION_SERVICE_REQUIRED = 'AUTOMATION_SERVICE_REQUIRED';
@@ -350,14 +341,12 @@ export {
   API_OPERATIONS,
   AUTOMATION_SERVICE_REQUIRED,
   AUTOMATION_JS_RECIPE_IDS,
-  PREFLIGHT_PROFILES,
   SEQUENCE_OPS,
   checkedApiJob,
   checkedConditionalExecution,
   checkedJavascriptExecution,
   checkedQueueResponse,
   checkedScheduleResult,
-  digestSeed,
   exactResultArray,
   operationSelection,
   plainData,

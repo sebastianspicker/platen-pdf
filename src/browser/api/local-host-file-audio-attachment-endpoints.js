@@ -1,6 +1,9 @@
 import { PlatenError } from '../../contracts/errors.js';
 import { OPAQUE_ID_PATTERN } from '../../contracts/pdfkit-client-contract-shared.js';
 import { PDF_FILE_AUDIO_ATTACHMENT_PROFILE } from '../../contracts/public-wire-identifiers.mjs';
+import { deepFreeze } from '../../contracts/deep-freeze.js';
+import { sameJson } from '../../contracts/same-json.js';
+import { canonicalTimestamp } from '../../contracts/canonical-timestamp.js';
 
 export { PDF_FILE_AUDIO_ATTACHMENT_PROFILE };
 const SHA256 = /^[0-9a-f]{64}$/u;
@@ -84,16 +87,6 @@ function normalizeRequest(value) {
   });
 }
 
-function canonicalTimestamp(value) {
-  if (typeof value !== 'string') return false;
-  const parsed = new Date(value);
-  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
-}
-
-function sameJson(left, right) {
-  try { return JSON.stringify(left) === JSON.stringify(right); } catch { return false; }
-}
-
 function validOperation(operation, { documentId, sourceSha256, request, outputSha256 }) {
   return exact(operation, OPERATION_KEYS) && operation.schemaVersion === 1
     && OPAQUE_ID_PATTERN.test(operation.id ?? '') && operation.type === 'pdf-file-audio-attachment'
@@ -138,12 +131,6 @@ function validateResult(result, { documentId, sourceSha256, request }) {
     || !Array.isArray(result.limitations) || !sameJson(result.limitations, LIMITATIONS)
     || !validArtifact(result.artifact, { documentId, sourceSha256, request })) invalid('The local host returned an invalid file/audio attachment result.');
   return result;
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 export function validatePdfFileAudioAttachmentResult(result, context) {

@@ -11,10 +11,10 @@ import {
   assertAccessibilityLinksBookmarksProof, assertAccessibilityLinksBookmarksWorkspace,
   readStableAccessibilityLinksBookmarks, writePrivateAccessibilityLinksBookmarksOutput,
 } from './pdf-accessibility-links-bookmarks-validation.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 function fail(code, message) { const error = new Error(message); error.code = code; throw error; }
 function aborted(signal) { if (signal.aborted) throw signal.reason ?? new Error('Accessibility links/bookmarks processing was cancelled.'); }
-function overlap(left, right) { return left.buffer === right.buffer && left.byteOffset < right.byteOffset + right.byteLength && right.byteOffset < left.byteOffset + left.byteLength; }
 function plainSnapshot(value, seen = new Set(), depth = 0) {
   if (value === null || typeof value !== 'object') return value;
   if (Buffer.isBuffer(value)) { if (nodeTypes.isProxy(value)) fail('ACCESSIBILITY_LINKS_BOOKMARKS_OUTPUT_INVALID', 'The links/bookmarks result contains a proxied byte buffer.'); return Buffer.from(value); }

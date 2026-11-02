@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -6,13 +5,13 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { inspectPdfAcroFormFillSave, PDF_ACROFORM_FILL_SAVE_PROFILE, preparePdfAcroFormFillSave } from './pdf-acroform-fill-save-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACROFORM_FILL_SAVE_JOB_MS = 120_000;
 export const MAX_PDF_ACROFORM_FILL_SAVE_SOURCE_BYTES = 32 * 1024 * 1024;
 export const MAX_PDF_ACROFORM_FILL_SAVE_OUTPUT_BYTES = MAX_PDF_ACROFORM_FILL_SAVE_SOURCE_BYTES + 512 * 1024;
 const SOURCE_MODE = 0o400; const OUTPUT_MODE = 0o600;
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function identity(left, right) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => left[key] === right[key]); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'AcroForm fill/save processing was cancelled.', 499, signal.reason); }
 async function workspace(directory, expected) { const info = await lstat(directory); if (!info.isDirectory() || info.isSymbolicLink() || (info.mode & 0o777) !== 0o700) fail('ACROFORM_FILL_SAVE_TAMPERED', 'The private fill/save workspace is unsafe.'); const actual = (await readdir(directory)).sort(); const wanted = [...expected].sort(); if (actual.length !== wanted.length || actual.some((item, index) => item !== wanted[index])) fail('ACROFORM_FILL_SAVE_TAMPERED', 'The private fill/save workspace contains unexpected files.'); }

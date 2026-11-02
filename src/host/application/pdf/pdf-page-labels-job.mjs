@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { chmod, open, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -6,6 +5,7 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { PDF_PAGE_LABELS_PROFILE, inspectPdfPageLabels, writePdfPageLabels } from './pdf-page-labels-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const MAX_OUTPUT_BYTES = MAX_SOURCE_BYTES + (2 * 1024 * 1024);
@@ -13,7 +13,6 @@ const CORE = Object.freeze({ writePdfPageLabels, inspectPdfPageLabels });
 const IDENTITY_KEYS = Object.freeze(['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs']);
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 function abort(signal) { if (signal?.aborted) throw signal.reason ?? new Error('Page-label processing was cancelled.'); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameIdentity(left, right) { return IDENTITY_KEYS.every((key) => left[key] === right[key]); }
 function privateIdentity(stat) { return Object.freeze(Object.fromEntries(IDENTITY_KEYS.map((key) => [key, stat[key]]))); }
 async function readPrivateFile(path, identity, expectedSha256, expectedSize, maximumBytes) {

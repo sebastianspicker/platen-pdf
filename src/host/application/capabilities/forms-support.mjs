@@ -75,12 +75,6 @@ function formsString(value, label, options, prefix) {
   try { return requireString(value, label, options); } catch { fail(`${prefix}_INVALID_REQUEST`, `${label} is invalid for the bounded professional subset.`, 400); }
 }
 
-function rejectDemoSource(ctx = {}) {
-  if (ctx.demoFixture === true && (ctx.sourcePdf !== undefined || ctx.sourceBytes !== undefined)) {
-    fail('FORM_DEMO_SOURCE_CONFLICT', 'demoFixture cannot be combined with a supplied source.', 422);
-  }
-}
-
 function mapWriterError(error, prefix) {
   const code = String(error?.code ?? '');
   if (code.includes('OUTPUT')) fail(`${prefix}_OUTPUT_INVALID`, 'Local form writer output validation rejected the output.', 502);
@@ -272,7 +266,6 @@ export {
   mapWriterError,
   mutationResult,
   normalizeValues,
-  rejectDemoSource,
   runWriter,
   signatureRequest,
   sourceBoundFillSave,

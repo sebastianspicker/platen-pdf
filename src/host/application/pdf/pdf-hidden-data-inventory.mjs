@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 import { parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
+import { isPlainObject } from '../../platform/runtime/plain-object.mjs';
 
 const MAX_SOURCE_BYTES = 256 * 1024 * 1024;
 const OPTION_KEYS = Object.freeze(new Set(['sourceSha256']));
@@ -19,11 +20,6 @@ function failure(message) {
 }
 
 function checksum(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
-
-function isPlainObject(value) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype;
-}
 
 function validateOptions(value = {}) {
   if (!isPlainObject(value)) throw failure('Hidden-data inventory request must be an object.');

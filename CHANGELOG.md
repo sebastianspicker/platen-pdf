@@ -4,6 +4,23 @@ This file records public-facing changes to Platen. The project follows
 semantic versioning for release identifiers, but alpha releases may change
 interfaces and output contracts without backward compatibility.
 
+## Source audit fixes (2026-11-02)
+
+- ZIP-based inputs (Office, OpenDocument, review exchange, comparison packages)
+  now stop unpacking at each entry's declared size, so a crafted archive can no
+  longer exhaust host memory.
+- `professional-capability` no longer runs handlers for capabilities the catalog
+  marks as planned; those IDs now fail with `PROFESSIONAL_HANDLER_MISSING`
+  instead of reporting success on built-in sample data.
+- Plugin package install, selection, and rollback now refuse to run without the
+  local admin policy, as documented; the HTTP rollback route calls the store
+  correctly; a CLI change whose audit record cannot be written reports
+  `ADMIN_AUDIT_INCOMPLETE`.
+- The CLI runs when started through a symlink; host shutdown no longer waits on
+  in-flight jobs; a failed startup removes its private session folder; workspace
+  routes reject non-object JSON with 400.
+- Restored the Node test suite (`npm test`).
+
 ## Development paused (2026-10-14)
 
 - Paused product development until further notice in favor of

@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const INCREMENTAL_GOTO_LINK_PROFILE = 'local-incremental-goto-link-v1';
 export const INCREMENTAL_GOTO_LINK_VALIDATORS = Object.freeze([
@@ -83,11 +84,6 @@ export function buildIncrementalGoToLinkMutation(state) {
     sourcePage: request.sourcePage, targetPage: request.targetPage,
     rect: Object.freeze(request.rect),
   });
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 function validArtifactIdentity(artifact, context) {

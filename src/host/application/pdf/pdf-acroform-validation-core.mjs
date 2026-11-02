@@ -3,11 +3,11 @@ import { isProxy } from 'node:util/types';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { compileBoundedRegex } from '../../platform/runtime/bounded-regex.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_FIELDS = 100;
 const MAX_DEPTH = 2;
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message) { throw failure('UNSUPPORTED_PDF_ACROFORM_VALIDATION_SOURCE', message); }
 function invalid(message) { throw failure('INVALID_PDF_ACROFORM_VALIDATION', message); }
 export function acroFormDigest(value) { return createHash('sha256').update(value).digest('hex'); }

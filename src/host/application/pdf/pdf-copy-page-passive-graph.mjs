@@ -3,6 +3,7 @@ import { readRegularOutput } from './pdf-output-guards.mjs';
 import { pdfDictionary, pdfInteger, pdfReference } from './pdf-classic-syntax.mjs';
 import { parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
 
 const MAX_COPY_SOURCE_BYTES = 64 * 1024 * 1024;
 const MAX_PAGE_TREE_DEPTH = 16;
@@ -71,10 +72,6 @@ function scanValue(value, counts, depth = 0) {
 
 function referenceKey(reference) {
   return `${reference.object}:${reference.generation}`;
-}
-
-function sameReference(left, right) {
-  return left.object === right.object && left.generation === right.generation;
 }
 
 function inspectPageTree(structure, catalogEntries) {

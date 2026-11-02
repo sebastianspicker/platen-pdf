@@ -4,6 +4,8 @@ import {
   PDF_ACCESSIBILITY_LINKS_BOOKMARKS_PROFILE,
   PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE,
 } from '../../contracts/public-wire-identifiers.mjs';
+import { deepFreeze } from '../../contracts/deep-freeze.js';
+import { sameJson } from '../../contracts/same-json.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const DEFINITIONS = Object.freeze({
@@ -173,10 +175,6 @@ function validArtifact(artifact, { documentId, sourceSha256, outputSha256, bytes
     && typeof operation.completedAt === 'string' && !Number.isNaN(Date.parse(operation.completedAt));
 }
 
-function sameJson(left, right) {
-  try { return JSON.stringify(left) === JSON.stringify(right); } catch { return false; }
-}
-
 function validProof(result, definition, request) {
   const proof = result.proof;
   if (!proof || typeof proof !== 'object' || proof.sourcePrefixPreserved !== true) return false;
@@ -240,12 +238,6 @@ function validLinksLocatorInventory(inventory, sourceSha256) {
   return new Set(fingerprints).size === fingerprints.length && inventory.links.length + inventory.bookmarks.length > 0
     && inventory.links.length + inventory.bookmarks.length <= 64
     && sourceSha256.length === 64;
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 export function validateProfessionalAccessibilityResult(result, { documentId, request, definition }) {

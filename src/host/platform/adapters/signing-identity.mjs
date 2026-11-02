@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { constants, lstat, open, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { runProcess } from '../runtime/process-runner.mjs';
+import { exactObject } from '../../../contracts/exact-object.js';
 
 export const SIGNING_IDENTITY_REQUEST_FILENAME = 'request.json';
 export const SIGNING_IDENTITY_INPUT_FILENAME = 'input.bin';
@@ -32,13 +33,6 @@ const HELPER_ERROR_CODES = new Set([
   'OUTPUT_EXISTS', 'OUTPUT_WRITE_FAILED', 'RESPONSE_TOO_LARGE',
   'CMS_INVALID', 'CMS_MULTIPLE_SIGNERS', 'TRUST_INDETERMINATE',
 ]);
-
-function exactObject(value, keys) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-    && Object.keys(value).length === keys.length
-    && Object.keys(value).every((key) => keys.includes(key));
-}
 
 function absolutePath(value, label) {
   if (typeof value !== 'string' || !isAbsolute(value) || value.includes('\0')) {

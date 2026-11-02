@@ -22,6 +22,8 @@ import {
   validateAecOutputEnvelope,
   validateAecParsedOutput,
 } from './pdf-aec-measure-output-validation.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export const AEC_MEASURE_DICTIONARY_PROFILE = 'platen-aec-measure-dictionary-v1';
 
@@ -32,12 +34,6 @@ const MAX_ANNOTATIONS = 50;
 const ACTIVE_ANNOTATION_KEYS = new Set([
   'A', 'AA', 'FS', 'Measure', 'Movie', 'Parent', 'Popup', 'RichMediaContent', 'Sound', '3DD',
 ]);
-
-function failure(code, message) {
-  const error = new Error(message);
-  error.code = code;
-  return error;
-}
 
 function unsupported() {
   return failure(
@@ -91,7 +87,6 @@ function pdfText(value) { return Object.freeze({ type: 'string', bytes: Buffer.f
 function pdfArray(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
 function pdfDict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
 function reference(object, generation = 0) { return Object.freeze({ type: 'ref', object, generation }); }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
 function referenceText(value) { return `${value.object} ${value.generation} R`; }
 
 function parseSource(buffer) {

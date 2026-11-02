@@ -1,22 +1,20 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { normalizePdfPageWatermark, PDF_PAGE_WATERMARK_APPEARANCE, PDF_PAGE_WATERMARK_LIMITS, PDF_PAGE_WATERMARK_PROFILE } from './pdf-page-watermark-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const FONT_NAME = 'WatermarkHelv';
 const UNSAFE = new Set(['AcroForm', 'Annots', 'A', 'AA', 'OpenAction', 'JavaScript', 'JS', 'StructTreeRoot', 'MarkInfo', 'OCProperties', 'Metadata', 'AF', 'Names', 'Perms', 'Outlines', 'XFA', 'ByteRange', 'Sig', 'Tabs', 'PieceInfo', 'Collection', 'Dests', 'Dest', 'GoTo', 'GoToR', 'Launch', 'SubmitForm', 'ImportData', 'RichMedia', '3D', 'Threads', 'ViewerPreferences', 'Lang', 'OutputIntents', 'Requirements', 'Legal', 'SpiderInfo', 'TrapNet', 'RoleMap', 'ParentTree', 'ActualText', 'Alt', 'E', 'AP', 'AS', 'OC', 'Encrypt']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The source is outside the passive page-watermark subset.') { throw failure('UNSUPPORTED_PDF_PAGE_WATERMARK', message); }
 function invalidOutput(message = 'PDF page-watermark output verification failed.') { throw failure('INVALID_PDF_PAGE_WATERMARK_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function same(a, b) { return a?.object === b?.object && a?.generation === b?.generation; }
 function number(value, raw = String(value)) { return Object.freeze({ type: 'number', value, integer: Number.isSafeInteger(value), raw }); }
 function name(value) { return Object.freeze({ type: 'name', value }); }
 function dict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
 function array(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 function equalValue(left, right) {
   if (!left || !right || left.type !== right.type) return left === right;
   if (left.type === 'ref') return same(left, right);

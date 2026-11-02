@@ -1,7 +1,6 @@
 import { OUTPUT_INTENT_PROFILE } from '../prepress/output-intent-contract.mjs';
 import { CMYK_CONVERSION_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
-import { assembleSpotColorPdf } from './specialist-embed-pdf.mjs';
-import { fail, requireString, result, sha256 } from './support.mjs';
+import { fail, requireString, result } from './support.mjs';
 import {
   SHA256, abort, authority, boundDocument, retainedBytes, revokeAfterFailure, runtime,
 } from './standards-preflight-print-core.mjs';
@@ -143,15 +142,5 @@ export async function colorOutputIntents(ctx = {}) {
     applied: true, artifactId: artifact.id, outputSha256: artifact.sha256,
     profileSha256: profile.sha256, profileBytes: profile.size, proof, receipt,
     pdf, bytes: pdf.length,
-  });
-}
-
-export function colorSpotColors(ctx = {}) {
-  const spots = Array.isArray(ctx.spots) ? ctx.spots : [{ name: 'PANTONE 185 C', cmyk: [0, 0.91, 0.76, 0] }];
-  const built = assembleSpotColorPdf({ spots: spots.slice(0, 50) });
-  if (!built.bytes.toString('latin1').includes('/Separation')) fail('SPOT_COLOR_MISSING', 'Separation color space missing from PDF.', 502);
-  return result('color.spot-colors', {
-    method: 'local-color-spot-separation-apply', spots: built.spots, count: built.count,
-    applied: true, outputSha256: sha256(built.bytes), pdf: built.bytes, bytes: built.bytes.length,
   });
 }

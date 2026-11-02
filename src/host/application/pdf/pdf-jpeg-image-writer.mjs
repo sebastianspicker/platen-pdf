@@ -1,8 +1,9 @@
-import { createHash } from 'node:crypto';
 import { PDF_JPEG_IMAGE_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { pdfDictionary, pdfInteger, pdfReference } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_JPEG_IMAGE_PROFILE };
 export const PDF_JPEG_IMAGE_INSERTION_PROFILE = PDF_JPEG_IMAGE_PROFILE;
@@ -13,11 +14,9 @@ const MAX_PAGE_COUNT = 10_000;
 const MAX_OBJECTS = 20_000;
 const UNSAFE_KEYS = new Set(['AA', 'A', 'AcroForm', 'AF', 'Collection', 'Encrypt', 'JS', 'JavaScript', 'Metadata', 'Names', 'OCProperties', 'OpenAction', 'Outlines', 'Perms', 'PieceInfo', 'StructTreeRoot', 'Sig', 'XFA']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message = 'The PDF JPEG image request is invalid.') { throw failure('INVALID_PDF_JPEG_IMAGE', message); }
 function unsupported(message = 'The PDF is outside the supported bounded JPEG image subset.') { throw failure('UNSUPPORTED_PDF_JPEG_IMAGE_SOURCE', message); }
 function invalidOutput(message = 'The PDF JPEG image output failed deterministic verification.') { throw failure('INVALID_PDF_JPEG_IMAGE_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function refText(reference) { return `${reference.object} ${reference.generation} R`; }
 function ref(value) { try { return pdfReference(value); } catch { unsupported(); } }
 function dict(value) { try { return pdfDictionary(value); } catch { unsupported(); } }

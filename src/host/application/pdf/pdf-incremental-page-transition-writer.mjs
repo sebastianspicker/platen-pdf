@@ -12,6 +12,8 @@ import {
   INCREMENTAL_PAGE_TRANSITION_PROFILE,
   normalizeIncrementalPageTransition,
 } from './pdf-incremental-page-transition-admission.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_PAGE_TREE_DEPTH = 16;
 const MAX_PAGE_TREE_NODES = 256;
@@ -26,7 +28,6 @@ const UNSAFE_KEYS = new Set([
 ]);
 const UNSAFE_TYPES = new Set(['Action', 'EmbeddedFile', 'Filespec', 'Sig', 'Widget']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the supported bounded page-transition subset.') {
   return failure('UNSUPPORTED_INCREMENTAL_PAGE_TRANSITION_PDF', message);
 }
@@ -34,7 +35,6 @@ function invalidOutput(message = 'Incremental page-transition output proof faile
   return failure('INVALID_INCREMENTAL_PAGE_TRANSITION_OUTPUT', message);
 }
 function sameReference(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 
 function parseStructure(bytes) {
   if (!Buffer.isBuffer(bytes) || bytes.length < 32) throw unsupported();

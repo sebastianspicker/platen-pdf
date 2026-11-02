@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import {
   parseClassicPdfStructure,
   resolveClassicPdfObject,
@@ -14,6 +13,8 @@ import {
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { PDF_SIGNATURE_CONTAINER_PROFILE } from '../../../contracts/pdf-certificate-signature-contract.js';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_SIGNATURE_CONTAINER_PROFILE };
 const MIN_PLACEHOLDER = 4096;
@@ -24,7 +25,6 @@ const MAX_PAGES = 10_000;
 const PREPARED = new WeakMap();
 const FINAL = new WeakMap();
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The source PDF is outside the supported passive signature-container subset.') {
   throw failure('UNSUPPORTED_PDF_SIGNATURE_CONTAINER_SOURCE', message);
 }
@@ -38,7 +38,6 @@ function number(value, raw = undefined) { return Object.freeze({ type: 'number',
 function array(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
 function dict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
 function sameRef(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 function exactObject(value, keys) {
   if (!value || Object.getPrototypeOf(value) !== Object.prototype || Object.getOwnPropertySymbols(value).length) invalid();

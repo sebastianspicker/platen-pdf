@@ -11,6 +11,7 @@ import {
 } from './pdf-classic-structure.mjs';
 import { normalizeClassicPdfObjectValue } from './pdf-classic-object-value.mjs';
 import { validatePdfDeletionReferences } from './pdf-incremental-deletion-validation.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_APPEND_BYTES = 1024 * 1024;
 const MAX_OFFSET = 9_999_999_999;
@@ -19,12 +20,6 @@ const classicDescriptors = new WeakSet();
 const classicGenericDescriptors = new WeakMap();
 const recordStreams = new WeakMap();
 const recordObjects = new WeakMap();
-
-function failure(code, message) {
-  const error = new Error(message);
-  error.code = code;
-  return error;
-}
 
 function invalid() { return failure('INVALID_CLASSIC_INCREMENTAL_REVISION', 'The classic incremental revision request is invalid.'); }
 

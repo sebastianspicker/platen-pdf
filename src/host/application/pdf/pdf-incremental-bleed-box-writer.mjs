@@ -15,6 +15,8 @@ import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import {
   INCREMENTAL_BLEED_BOX_PROFILE, normalizeIncrementalBleedBox,
 } from './pdf-incremental-bleed-box-admission.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_PAGE_TREE_DEPTH = 16;
 const MAX_PAGE_TREE_NODES = 256;
@@ -24,11 +26,9 @@ const CATALOG_REJECTED_KEYS = new Set([
 ]);
 const PAGE_REJECTED_KEYS = new Set(['AA', 'A', 'Annots', 'Dur', 'Metadata', 'PresSteps', 'Trans']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported() { return failure('UNSUPPORTED_INCREMENTAL_BLEED_BOX_PDF', 'PDF is outside the supported bounded incremental bleed-box subset.'); }
 function invalidOutput() { return failure('INVALID_INCREMENTAL_BLEED_BOX_OUTPUT', 'Incremental bleed-box output proof failed.'); }
 function noChange() { return failure('INVALID_INCREMENTAL_BLEED_BOX', 'Incremental PDF bleed box would not change the selected page.'); }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
 function refText(ref) { return `${ref.object} ${ref.generation} R`; }
 
 function parseStructure(buffer) {

@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto';
 import { PDF_ACROFORM_RADIO_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export { PDF_ACROFORM_RADIO_PROFILE };
 const MAX_SOURCE = 32 * 1024 * 1024; const MAX_PAGES = 10_000; const MAX_COORDINATE = 1_000_000;
@@ -11,7 +11,6 @@ function err(code, message) { const e = new Error(message); e.code = code; retur
 function unsupported(message = 'The source PDF is outside the supported passive AcroForm radio subset.') { throw err('UNSUPPORTED_PDF_ACROFORM_RADIO_SOURCE', message); }
 function invalid(message = 'The AcroForm radio request is invalid.') { throw err('INVALID_PDF_ACROFORM_RADIO', message); }
 function outputInvalid() { throw err('INVALID_PDF_ACROFORM_RADIO_OUTPUT', 'The AcroForm radio output failed deterministic verification.'); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function name(value) { return Object.freeze({ type: 'name', value }); } function num(value, raw) { return Object.freeze({ type: 'number', value, integer: Number.isSafeInteger(value), ...(raw ? { raw } : {}) }); }
 function arr(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); } function dict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
 function ref(value) { return Object.freeze({ type: 'ref', object: value.object, generation: value.generation }); } function same(a, b) { return a?.object === b?.object && a?.generation === b?.generation; }

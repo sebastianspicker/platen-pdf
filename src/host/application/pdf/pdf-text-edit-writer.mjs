@@ -14,6 +14,7 @@ import {
   normalizePdfTextEditRequest,
   PDF_TEXT_EDIT_PROFILE,
 } from './pdf-text-edit-contract.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const UNSAFE_KEYS = new Set([
@@ -53,7 +54,6 @@ function sha256(value) { return createHash('sha256').update(value).digest('hex')
 function sameReference(left, right) {
   return left?.object === right?.object && left?.generation === right?.generation;
 }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 
 function checkedRequest(value) {
   try { return normalizePdfTextEditRequest(value); }

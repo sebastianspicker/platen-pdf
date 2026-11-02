@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -6,13 +5,13 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { inspectPdfAcroFormRadio, PDF_ACROFORM_RADIO_PROFILE, preparePdfAcroFormRadio } from './pdf-acroform-radio-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACROFORM_RADIO_JOB_MS = 120_000;
 export const MAX_PDF_ACROFORM_RADIO_SOURCE_BYTES = 32 * 1024 * 1024;
 export const MAX_PDF_ACROFORM_RADIO_OUTPUT_BYTES = MAX_PDF_ACROFORM_RADIO_SOURCE_BYTES + 512 * 1024;
 const SOURCE_MODE = 0o400; const OUTPUT_MODE = 0o600;
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function identity(a, b) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((k) => a[k] === b[k]); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'AcroForm radio processing was cancelled.', 499, signal.reason); }
 async function workspace(path, expected) { const s = await lstat(path); if (!s.isDirectory() || s.isSymbolicLink() || (s.mode & 0o777) !== 0o700) fail('ACROFORM_RADIO_TAMPERED', 'The private radio workspace is unsafe.', 502); const actual = (await readdir(path)).sort(); const wanted = [...expected].sort(); if (actual.length !== wanted.length || actual.some((x, i) => x !== wanted[i])) fail('ACROFORM_RADIO_TAMPERED', 'The private radio workspace contains unexpected files.', 502); }

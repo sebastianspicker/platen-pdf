@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { COMPARISON_PACKAGE_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -10,12 +9,12 @@ import {
   COMPARISON_PACKAGE_MEDIA_TYPE, contentReceiptBytes, validateComparisonPackage,
   visualReceiptEntries,
 } from './comparison-package-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export { COMPARISON_PACKAGE_PROFILE };
 
 function fail(code, message, status = 422, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'Comparison package creation was cancelled.', 499, signal.reason); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function ownData(value, key) {
   if (!value || typeof value !== 'object' || isProxy(value)) return undefined;
   const descriptor = Object.getOwnPropertyDescriptor(value, key);

@@ -1,23 +1,11 @@
-import { createHash } from 'node:crypto';
-import { createBlankPdf } from '../pdf/pdf-factory.mjs';
 import { PREFLIGHT_PROFILES, serializePreflightReportXml } from '../prepress/preflight-rules.mjs';
 import { PDF_PRINTER_MARKS_PROFILE } from '../pdf/pdf-printer-marks-writer.mjs';
 import { PROFESSIONAL_PRINT_TRANSPARENCY_PROFILE } from '../../../contracts/professional-print-transparency-contract.js';
-import { result, fail, requireString, requireBytes, sha256 } from './support.mjs';
-import { assembleBarcodeDecorationPdf } from './specialist-embed-pdf.mjs';
+import { result, fail, requireString } from './support.mjs';
 import {
   SHA256, abort, runtime, authority, retainedBytes, revokeAfterFailure, boundDocument, strictReport,
 } from './standards-preflight-print-core.mjs';
 
-export function preflightFixups(ctx = {}) {
-  const source = requireBytes(ctx.sourcePdf, 'sourcePdf');
-  const issues = [];
-  if (source.length > 64 * 1024 * 1024) issues.push({ code: 'SIZE', severity: 'error', message: 'Source exceeds 64 MiB' });
-  if (!source.subarray(0, 5).equals(Buffer.from('%PDF-'))) issues.push({ code: 'HEADER', severity: 'error', message: 'Missing PDF header' });
-  const fixups = issues.length ? [] : [{ id: 'noop', applied: false, summary: 'No automatic fixups required for local review' }];
-  const report = Object.freeze({ kind: 'preflight-fixups', issues, fixups, passed: issues.length === 0 });
-  return result('preflight.fixups', { method: 'local-preflight-fixup-review', report, reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex') });
-}
 export function preflightProfiles(ctx = {}) {
   const profile = requireString(ctx.profile ?? 'print-review', 'profile', { min: 1, max: 40 });
   if (!PREFLIGHT_PROFILES.includes(profile)) fail('INVALID_PREFLIGHT_PROFILE', 'Choose print-review or archive-review.', 400);
@@ -45,48 +33,6 @@ export async function preflightReports(ctx = {}) {
     method: 'validated-preflight-report-export', profile, report, xml, reportSha256: report.reportSha256,
     formats: ['json', 'xml'], authoritative: false, certified: false,
     limitations: ['The exported local preflight report is non-authoritative review evidence, not standards certification or press approval.'],
-  });
-}
-export function preflightCertifiedPdf(ctx = {}) {
-  const source = requireBytes(ctx.sourcePdf, 'sourcePdf');
-  const history = Array.isArray(ctx.history) ? ctx.history : [{ rev: 1, action: 'created' }];
-  return result('preflight.certified-pdf', {
-    method: 'local-preflight-certified-history',
-    history: history.slice(0, 50),
-    sourceSha256: sha256(source),
-    certified: false,
-  });
-}
-
-export function printOutputPreview(ctx = {}) {
-  const source = requireBytes(ctx.sourcePdf, 'sourcePdf');
-  return result('print.output-preview', {
-    method: 'local-print-output-preview-token',
-    sourceSha256: sha256(source),
-    previewId: createHash('sha256').update(source.subarray(0, 64)).digest('hex').slice(0, 16),
-    profile: ctx.profile ?? 'screen-preview',
-  });
-}
-export function printSeparations(ctx = {}) {
-  const plates = Array.isArray(ctx.plates) ? ctx.plates : ['Cyan', 'Magenta', 'Yellow', 'Black'];
-  return result('print.separations', { method: 'local-print-separation-plates', plates: plates.slice(0, 16), count: plates.length });
-}
-export function printInkCoverage(ctx = {}) {
-  const coverage = {
-    C: Number(ctx.C ?? 12),
-    M: Number(ctx.M ?? 8),
-    Y: Number(ctx.Y ?? 10),
-    K: Number(ctx.K ?? 20),
-  };
-  const total = coverage.C + coverage.M + coverage.Y + coverage.K;
-  return result('print.ink-coverage', { method: 'local-print-ink-coverage-estimate', coverage, total, overLimit: total > 300 });
-}
-export function printOverprintPreview(ctx = {}) {
-  return result('print.overprint-preview', {
-    method: 'local-print-overprint-flags',
-    overprintFill: ctx.overprintFill !== false,
-    overprintStroke: Boolean(ctx.overprintStroke),
-    simulate: true,
   });
 }
 export async function printTransparencyFlattening(ctx = {}) {
@@ -130,15 +76,6 @@ export async function printTransparencyFlattening(ctx = {}) {
     certified: false,
     limitations: ['The fixed local Ghostscript PDF 1.3 rewrite preserves source provenance and page count but does not prove that every transparency construct was flattened or certify standards or press suitability.'],
   });
-}
-export function printSoftProof(ctx = {}) {
-  const profile = requireString(ctx.profile ?? 'sRGB', 'profile', { min: 1, max: 80 });
-  return result('print.soft-proof', { method: 'local-print-soft-proof-profile', profile, intent: ctx.intent ?? 'relative-colorimetric' });
-}
-export function printTrapping(ctx = {}) {
-  const width = Number(ctx.widthPoints ?? 0.25);
-  if (!(width >= 0 && width <= 4)) fail('INVALID_TRAP', 'width', 400);
-  return result('print.trapping', { method: 'local-print-trap-width', widthPoints: width, enabled: width > 0 });
 }
 export async function printBleedMarks(ctx = {}) {
   const service = authority(ctx, 'printerMarks', 'PdfPrinterMarksService');
@@ -251,28 +188,5 @@ export async function printImageResolutionCompression(ctx = {}) {
     belowThreshold: belowThresholdCount > 0, belowThresholdCount, unknownResolutionCount,
     inspected: true, compressionControlled: false, authoritative: false, certified: false,
     limitations: ['Resolution is a bounded review threshold; no recompression or press suitability claim is made.'],
-  });
-}
-export function printVariableData(ctx = {}) {
-  const records = Array.isArray(ctx.records) ? ctx.records.slice(0, 100) : [{ name: 'Ada' }, { name: 'Grace' }];
-  return result('print.variable-data', { method: 'local-print-variable-data-records', records, count: records.length });
-}
-export function printBarcodeDecoration(ctx = {}) {
-  const value = requireString(ctx.value ?? '123456789012', 'value', { min: 4, max: 64 });
-  const symbology = requireString(ctx.symbology ?? 'code128', 'symbology', { min: 2, max: 32 });
-  const built = assembleBarcodeDecorationPdf({ value, symbology });
-  const latin1 = built.bytes.toString('latin1');
-  if (!latin1.includes('BARCODE_ID:') || !latin1.includes('CUT_CONTOUR')) {
-    fail('BARCODE_DECORATION_MISSING', 'Barcode decoration markers missing from PDF.', 502);
-  }
-  return result('print.barcode-decoration', {
-    method: 'local-print-barcode-decoration-pdf',
-    value: built.value,
-    symbology: built.symbology,
-    barcodeId: built.barcodeId,
-    applied: true,
-    outputSha256: sha256(built.bytes),
-    pdf: built.bytes,
-    bytes: built.bytes.length,
   });
 }

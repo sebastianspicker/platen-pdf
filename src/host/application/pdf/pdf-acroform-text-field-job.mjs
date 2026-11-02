@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -6,13 +5,13 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { inspectPdfAcroFormTextField, PDF_ACROFORM_TEXT_FIELD_PROFILE, preparePdfAcroFormTextField } from './pdf-acroform-text-field-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACROFORM_TEXT_FIELD_JOB_MS = 120_000;
 export const MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES = 32 * 1024 * 1024;
 export const MAX_PDF_ACROFORM_TEXT_FIELD_OUTPUT_BYTES = MAX_PDF_ACROFORM_TEXT_FIELD_SOURCE_BYTES + 512 * 1024;
 const SOURCE_MODE = 0o400; const OUTPUT_MODE = 0o600;
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function identity(a, b) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => a[key] === b[key]); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'AcroForm text-field processing was cancelled.', 499, signal.reason); }
 async function workspace(path, expected) { const stat = await lstat(path); if (!stat.isDirectory() || stat.isSymbolicLink() || (stat.mode & 0o777) !== 0o700) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The private text-field workspace is unsafe.'); const files = (await readdir(path)).sort(); const wanted = [...expected].sort(); if (files.length !== wanted.length || files.some((value, index) => value !== wanted[index])) fail('ACROFORM_TEXT_FIELD_TAMPERED', 'The private text-field workspace contains unexpected files.'); }

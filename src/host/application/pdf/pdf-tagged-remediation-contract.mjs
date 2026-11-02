@@ -1,4 +1,5 @@
 import { TAGGED_PDF_REMEDIATION_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const ROLE = /^[A-Za-z][A-Za-z0-9]{0,31}$/u;
@@ -13,7 +14,6 @@ export const TAGGED_PDF_STANDARD_ROLES = Object.freeze([
   'LBody', 'Table', 'TR', 'TH', 'TD', 'Span', 'Link', 'Artifact',
 ]);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message = 'The tagged-PDF remediation request is invalid.') {
   return failure('INVALID_TAGGED_PDF_REMEDIATION_REQUEST', message);
 }

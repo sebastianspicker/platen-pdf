@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { basename, extname, join } from 'node:path';
 import { chmod, open, readFile, unlink } from 'node:fs/promises';
 import { HostError } from '../../platform/runtime/host-error.mjs';
@@ -16,6 +15,7 @@ import {
   normalizeRedactionOverlayLabelRequest,
   validateRedactionOverlayLabelResult,
 } from '../../../contracts/pdf-redaction-overlay-label-contract.js';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_JOB_MS = 120_000;
 const MAX_SOURCE_BYTES = 128 * 1024 * 1024;
@@ -29,8 +29,6 @@ const STORE_METHODS = Object.freeze([
 function host(code, message, status = 502, cause) {
   return new HostError(code, message, status, cause ? { cause } : undefined);
 }
-
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 function overlaps(left, right) {
   return Buffer.isBuffer(left) && Buffer.isBuffer(right)

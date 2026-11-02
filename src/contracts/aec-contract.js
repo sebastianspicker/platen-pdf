@@ -1,3 +1,5 @@
+import { deepFreeze } from './deep-freeze.js';
+
 const SHA256 = /^[a-f0-9]{64}$/;
 const OPAQUE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const LENGTH_UNITS = new Set(['mm', 'cm', 'm', 'in', 'ft']);
@@ -61,12 +63,6 @@ function pointList(value, label, minimum, maximum = MAX_POINTS) {
     invalid(`${label} must contain ${minimum} through ${maximum} points.`);
   }
   return Object.freeze(value.map((entry, index) => point(entry, `${label}[${index}]`)));
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 export function normalizeAecCalibrationRequest(value) {

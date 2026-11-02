@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const INCREMENTAL_BLEED_BOX_PROFILE = 'local-classic-incremental-bleed-box-v1';
 export const INCREMENTAL_BLEED_BOX_VALIDATORS = Object.freeze([
@@ -71,11 +72,6 @@ function validArtifact(artifact, context) {
     && artifact.size <= 129 * 1024 * 1024
     && SHA256.test(artifact.sha256 ?? '') && artifact.sha256 !== context.sourceSha256
     && typeof artifact.createdAt === 'string' && !Number.isNaN(Date.parse(artifact.createdAt));
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 function validOperation(operation, artifact, context) {

@@ -26,6 +26,7 @@ The current candidate is `0.3.0-alpha.1`. Keep these files aligned:
 From a trusted, quiescent checkout:
 
 ```sh
+npm test
 npm run verify
 npm run check:professional-clones
 npm run release:validate

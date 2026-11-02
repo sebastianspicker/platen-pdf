@@ -1,16 +1,16 @@
-import { createHash } from 'node:crypto';
 import { PDF_ACROFORM_SIGNATURE_FIELD_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_ACROFORM_SIGNATURE_FIELD_PROFILE };
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const MAX_PAGES = 10_000;
 const MAX_COORDINATE = 1_000_000;
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The source PDF is outside the supported passive AcroForm signature-field subset.') { throw failure('UNSUPPORTED_PDF_ACROFORM_SIGNATURE_FIELD_SOURCE', message); }
 function invalid(message = 'The AcroForm signature-field request is invalid.') { throw failure('INVALID_PDF_ACROFORM_SIGNATURE_FIELD', message); }
 function outputInvalid() { throw failure('INVALID_PDF_ACROFORM_SIGNATURE_FIELD_OUTPUT', 'The AcroForm signature-field output failed deterministic verification.'); }
@@ -19,7 +19,6 @@ function number(value, raw = undefined) { return Object.freeze({ type: 'number',
 function array(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
 function dict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
 function sameRef(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 function exactObject(value, keys) {
   if (!value || Object.getPrototypeOf(value) !== Object.prototype || Object.getOwnPropertySymbols(value).length) invalid();

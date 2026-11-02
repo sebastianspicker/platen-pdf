@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { open, readFile, rename, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { HostError } from '../../platform/runtime/host-error.mjs';
+import { isPlainObject } from '../../platform/runtime/plain-object.mjs';
 
 const PLUGIN_ID = /^[a-z][a-z0-9]*(?:\.[a-z0-9-]+)+$/;
 const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
@@ -12,7 +13,6 @@ const VERSION_RECORD_FIELDS = new Set(['digest', 'installedAt']);
 const SELECTED_RECORD_FIELDS = new Set(['version', 'digest']);
 
 function fail(code, message, status = 400) { throw new HostError(code, message, status); }
-function isPlainObject(value) { return Boolean(value) && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype; }
 function assertExactKeys(value, expected) {
   if (!isPlainObject(value) || Object.keys(value).length !== expected.size || Object.keys(value).some((key) => !expected.has(key))) fail('PACKAGE_REGISTRY_INVALID', 'Plugin registry contains an invalid object.', 500);
 }

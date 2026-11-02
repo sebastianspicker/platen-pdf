@@ -2,6 +2,7 @@ import { PlatenError } from '../../contracts/errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from '../../contracts/pdfkit-client-contract-shared.js';
 import { normalizeSnapshotRegion } from '../../contracts/snapshot-output.js';
 import { PDFKIT_TOP_LEVEL_OUTLINE_SPLIT_PROFILE } from '../../contracts/public-wire-identifiers.mjs';
+import { deepFreeze } from '../../contracts/deep-freeze.js';
 
 const jsonOptions = (body, signal) => ({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal });
 const documentPath = (documentId, suffix) => `/api/documents/${encodeURIComponent(documentId)}${suffix}`;
@@ -139,12 +140,6 @@ function validArtifact(artifact, context) {
     || operation.validation.manifestSha256 !== operation.expected.manifestSha256
     || !validCompositionSemantics(operation, context)) return false;
   return true;
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 function validateArtifactBody(body, context) {

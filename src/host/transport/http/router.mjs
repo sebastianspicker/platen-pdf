@@ -70,39 +70,46 @@ import {
   validateOcrDocumentResult, validateOcrLayoutResult,
 } from '../../../contracts/ocr-contract.js';
 
-const PDFKIT_MUTATION_JSON_BODY_LIMIT = 8_192;
-const PDFKIT_TEXT_FIELD_WIDGET_JSON_BODY_LIMIT = 4_096;
-const PDFKIT_PROTECTION_JSON_BODY_LIMIT = 2_048;
-const INCREMENTAL_METADATA_JSON_BODY_LIMIT = 8_192;
-const INCREMENTAL_BLEED_BOX_JSON_BODY_LIMIT = 2_048;
-const INCREMENTAL_GOTO_LINK_JSON_BODY_LIMIT = 2_048;
-const INCREMENTAL_NAMED_DESTINATION_JSON_BODY_LIMIT = 2_048;
-const INCREMENTAL_PAGE_VECTOR_JSON_BODY_LIMIT = 2_048;
-const INCREMENTAL_PAGE_TRANSITION_JSON_BODY_LIMIT = 2_048;
-const PAGE_TEXT_JSON_BODY_LIMIT = 2_048;
-const TEXT_REFLOW_JSON_BODY_LIMIT = 16_384;
-const REVIEW_OPERATION_JSON_BODY_LIMIT = 32_768;
-const FULL_PAGE_REDACTION_JSON_BODY_LIMIT = 1_024;
-const FULL_PAGE_REDACTION_BATCH_JSON_BODY_LIMIT = 2_048;
-const PRINTER_MARKS_JSON_BODY_LIMIT = 4_096;
-const PAGE_BACKGROUND_JSON_BODY_LIMIT = 4_096;
-const SPECIALIST_CONTENT_JSON_BODY_LIMIT = 2_048;
-const LAYER_DEFAULTS_JSON_BODY_LIMIT = 4_096;
-const CERTIFICATE_SIGNATURE_JSON_BODY_LIMIT = 4_096;
-const HIDDEN_DATA_SANITIZATION_JSON_BODY_LIMIT = 1_024;
-const INCREMENTAL_ACCESSIBILITY_METADATA_JSON_BODY_LIMIT = 2_048;
-const JAVASCRIPT_REMOVAL_JSON_BODY_LIMIT = 2_048;
-const ATTACHMENT_REMOVAL_JSON_BODY_LIMIT = 1_024;
-const COPY_PAGE_JSON_BODY_LIMIT = 2_048;
-const ANNOTATION_FLATTEN_JSON_BODY_LIMIT = 2_048;
-const FAST_WEB_VIEW_JSON_BODY_LIMIT = 2_048;
-const OOXML_EXPORT_JSON_BODY_LIMIT = 2_048;
-const PROFESSIONAL_ACCESSIBILITY_JSON_BODY_LIMIT = 128 * 1024;
-const PROFESSIONAL_PRINT_INSPECTION_JSON_BODY_LIMIT = 2_048;
-const PROFESSIONAL_PRINT_TRANSPARENCY_JSON_BODY_LIMIT = 2_048;
-const ACROFORM_FILL_SAVE_JSON_BODY_LIMIT = 4_096;
-const ACROFORM_VALIDATION_JSON_BODY_LIMIT = 32_768;
-const ACROFORM_DATA_EXPORT_JSON_BODY_LIMIT = 256;
+const ROUTES = Object.freeze({
+  workspace: handleWorkspaceRoute, workflow: handleWorkflowRoute, incrementalMetadata: handleIncrementalMetadataRoute,
+  incrementalBleedBox: handleIncrementalBleedBoxRoute, incrementalGoToLink: handleIncrementalGoToLinkRoute,
+  incrementalNamedDestination: handleIncrementalNamedDestinationRoute, incrementalPageVector: handleIncrementalPageVectorRoute,
+  incrementalPageTransition: handleIncrementalPageTransitionRoute, pageText: handlePageTextRoute, textReflow: handleTextReflowRoute,
+  fileAudioAttachment: handleFileAudioAttachmentRoute, reviewMeasurement: handleReviewMeasurementRoute,
+  reviewAnnotationImportExport: handleReviewAnnotationImportExportRoute, reviewSharedExchange: handleReviewSharedExchangeRoute,
+  commentsToOffice: handleCommentsToOfficeRoute, reviewNotifications: handleReviewNotificationRoute, reviewSidecar: handleReviewSidecarRoute,
+  formJavaScriptInventory: handleFormJavaScriptInventoryRoute, xfaInspection: handleXfaInspectionRoute, ooxmlExport: handleOoxmlExportRoute,
+  ocrEditable: handleOcrEditableRoute, fullPageRedaction: handleFullPageRedactionRoute, fullPageRedactionBatch: handleFullPageRedactionBatchRoute,
+  redactionOverlayLabel: handleRedactionOverlayLabelRoute, printerMarks: handlePrinterMarksRoute, pageBackground: handlePageBackgroundRoute,
+  specialistContent: handleSpecialistContentRoute, layerDefaults: handleLayerDefaultsRoute, certificateSign: handleCertificateSignRoute,
+  electronicSigningIntent: handleElectronicSigningIntentRoute, hiddenDataSanitization: handleHiddenDataSanitizationRoute,
+  acroFormCheckbox: handleAcroFormCheckboxRoute, acroFormRadio: handleAcroFormRadioRoute, acroFormTextField: handleAcroFormTextFieldRoute,
+  acroFormSignatureField: handleAcroFormSignatureFieldRoute, acroFormBarcode: handleAcroFormBarcodeRoute,
+  acroFormTabOrderTooltip: handleAcroFormTabOrderTooltipRoute, acroFormFillValidation: handleAcroFormFillValidationRoute,
+  acroFormDataExport: handleAcroFormDataExportRoute, comparisonPackage: handleComparisonPackageRoute, aecMeasurementLegend: handleAecMeasurementLegendRoute,
+  taggedRemediation: handleTaggedRemediationRoute, professionalAccessibility: handleProfessionalAccessibilityRoute, jpegImage: handleJpegImageRoute,
+  jpegImageReplacement: handleJpegImageReplacementRoute, pageLabels: handlePageLabelsRoute, advancedSearch: handleAdvancedSearchRoute,
+  sensitivePatterns: handleSensitivePatternRoute, incrementalAccessibilityMetadata: handleIncrementalAccessibilityMetadataRoute,
+  removal: handleRemovalRoutes, fastWebView: handleFastWebViewRoute, copyPage: handleCopyPageRoute, pdfkit: handlePdfkitRoute,
+  acroFormChoice: handleAcroFormChoiceRoute, batesNumbering: handleBatesNumberingRoute, documentService: handleDocumentServiceRoute,
+});
+
+const LIMITS = Object.freeze({
+  incrementalMetadata: 8_192, incrementalBleedBox: 2_048, incrementalGotoLink: 2_048, incrementalNamedDestination: 2_048,
+  incrementalPageVector: 2_048, incrementalPageTransition: 2_048, pageText: 2_048, textReflow: 16_384,
+  fileAudioAttachment: 32_768, reviewMeasurement: 32_768, reviewAnnotationImportExport: 32_768, reviewSharedExchange: 1024 * 1024,
+  commentsToOffice: 32_768, reviewNotifications: 32_768, reviewSidecar: 32_768, formJavaScriptInventory: 2_048, xfaInspection: 2_048,
+  fullPageRedaction: 1_024, fullPageRedactionBatch: 2_048, printerMarks: 4_096, pageBackground: 4_096,
+  layerDefaults: 4_096, specialistContent: 2_048, certificateSignature: 4_096, hiddenDataSanitization: 1_024, taggedRemediation: 128 * 1024,
+  jpegImage: 2_048, jpegImageReplacement: 2_048, pageLabels: 8_192, advancedSearch: 4_096, sensitivePatterns: 8_192, redactionOverlayLabel: 4_096,
+  acroFormFillSave: 4_096, acroFormValidation: 32_768, acroFormDataExport: 256,
+  incrementalAccessibilityMetadata: 2_048, copyPage: 2_048,
+  pdfkit: 4_096, ooxmlExport: 2_048, acroFormChoice: 16_384, batesNumbering: 8_192, fastWebView: 2_048,
+  professionalAccessibility: 128 * 1024, professionalPrintInspection: 2_048, professionalPrintTransparency: 2_048,
+  pdfkitMutation: 8_192, pdfkitProtection: 2_048,
+  javascriptRemoval: 2_048, attachmentRemoval: 1_024, annotationFlatten: 2_048,
+});
+
 
 function exactJsonObject(value, keys) {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -143,15 +150,15 @@ async function handleRemovalRoutes(options) {
   };
   if (await handleJavaScriptRemovalRoute({
     ...shared, javascriptRemoval: options.javascriptRemoval,
-    bodyLimit: JAVASCRIPT_REMOVAL_JSON_BODY_LIMIT,
+    bodyLimit: LIMITS.javascriptRemoval,
   })) return true;
   if (await handleAttachmentRemovalRoute({
     ...shared, attachmentRemoval: options.attachmentRemoval,
-    bodyLimit: ATTACHMENT_REMOVAL_JSON_BODY_LIMIT,
+    bodyLimit: LIMITS.attachmentRemoval,
   })) return true;
   return handleAnnotationFlattenRoute({
     ...shared, annotationFlatten: options.annotationFlatten,
-    bodyLimit: ANNOTATION_FLATTEN_JSON_BODY_LIMIT,
+    bodyLimit: LIMITS.annotationFlatten,
   });
 }
 
@@ -181,37 +188,7 @@ function requestProcessing(request, response) {
 }
 
 export function createAppHandler({
-  staticHandler, store, service, inputs = null, conversion = null, workspaceState,
-  domainFacade = null, aecArtifacts = null, projectBundles = null,
-  rasterMutations = null, redactionPlans = null, redactionPlanReports = null,
-  comparisons = null, comparisonPackages = null, prepress = null, accessibilityReviews = null,
-  reviewMeasurements = null, reviewAnnotationImportExport = null, reviewSharedExchange = null, commentsToOffice = null, reviewNotifications = null, reviewSidecar = null,
-  accessibilityRemediations = null, standardsValidations = null, incrementalMetadata = null,
-  incrementalBleedBox = null, incrementalGoToLink = null, incrementalNamedDestination = null,
-  incrementalPageVector = null, pageText = null, textReflow = null, fullPageRedaction = null, printerMarks = null, pageBackground = null,
-  fileAudioAttachments = null, formJavaScriptInventory = null, xfaInspection = null,
-  incrementalPageTransition = null,
-  layerDefaults = null,
-  signingIdentityDirectory = null, certificateSignature = null, signingIdentityReady = false,
-  electronicSigningIntent = null,
-  hiddenDataSanitization = null,
-  acroFormCheckbox = null, acroFormRadio = null, acroFormTextField = null, acroFormChoice = null, acroFormSignatureField = null, acroFormBarcode = null, acroFormTabOrderTooltip = null, batesNumbering = null, aecMeasurementLegend = null,
-  acroFormFillSave = null, acroFormValidation = null, acroFormDataExport = null,
-  taggedRemediation = null, taggedRemediationReady = false,
-  jpegImage = null, jpegImageReady = false,
-  jpegImageReplacement = null, jpegImageReplacementReady = false,
-  pageLabels = null, pageLabelsReady = false,
-  advancedSearch = null, advancedSearchReady = false, sensitivePatterns = null, redactionOverlayLabels = null, specialistContent = null, specialistContentReady = false,
-  incrementalAccessibilityMetadata = null, javascriptRemoval = null,
-  attachmentRemoval = null, annotationFlatten = null, fastWebView = null,
-  pdfkitInspections = null, pdfkitOutlineSplits = null, pdfkitMutations = null,
-  pdfkitProtection = null, pdfkitSanitization = null, pdfkitTextFieldWidget = null, signatureTrustReady = false,
-  ooxmlExport = null, ocrEditableOutput = null,
-  pluginPackages = null,
-  professionalCapabilities = null,
-  scannerDiscovery = null, scannerDiscoveryReady = false,
-  scannerAcquisition = null, scannerAcquisitionReady = false,
-  token, host, port,
+  staticHandler, store, service, workspaceState, token, host, port, inputs = null, conversion = null, ...services
 }) {
   if (typeof staticHandler !== 'function' || !store || !service || !workspaceState || typeof token !== 'string') {
     throw new TypeError('createAppHandler requires staticHandler, store, service, workspaceState, and a session token.');
@@ -219,54 +196,30 @@ export function createAppHandler({
   if (Boolean(inputs) !== Boolean(conversion)) {
     throw new TypeError('createAppHandler requires both inputs and conversion when conversion routes are enabled.');
   }
+  const context = { ...services, store, service, inputs, conversion, workspaceState };
   return async (request, response) => {
     const url = apiRequestUrl(request, response, host, staticHandler);
     if (!url) return;
     const { pathname } = url;
     try {
       if (!isAllowedHost(request.headers.host, host, port)) throw new HostError('MISDIRECTED_REQUEST', 'Misdirected request.', 421);
-      if (await handleBootstrapRoute({
-        pathname, request, response, service, inputs, conversion, domainFacade, prepress, aecArtifacts,
-        projectBundles, accessibilityRemediations, standardsValidations, reviewSidecar, incrementalMetadata, incrementalBleedBox, incrementalGoToLink, incrementalNamedDestination, incrementalPageVector, pageText, textReflow, fullPageRedaction, printerMarks, pageBackground, layerDefaults, incrementalAccessibilityMetadata, javascriptRemoval, attachmentRemoval, annotationFlatten, fastWebView, pdfkitInspections, redactionPlans, redactionPlanReports, fileAudioAttachments, reviewMeasurements, reviewAnnotationImportExport, reviewSharedExchange, commentsToOffice, reviewNotifications, formJavaScriptInventory,
-        pdfkitOutlineSplits, pdfkitMutations, pdfkitProtection, pdfkitSanitization, pdfkitTextFieldWidget,
-        signatureTrustReady, signingIdentityReady, hiddenDataSanitization, acroFormCheckbox, acroFormRadio, acroFormTextField, acroFormChoice, acroFormSignatureField, acroFormFillSave, acroFormValidation, batesNumbering, aecMeasurementLegend, jpegImage, jpegImageReplacement, pageLabels, advancedSearch, specialistContent, scannerDiscovery, scannerDiscoveryReady, scannerAcquisition, scannerAcquisitionReady, token, method, requireLocalFetchMetadata, json, sanitizedEngineAvailability,
-      })) return;
+      if (await handleBootstrapRoute({ ...context, token, pathname, request, response, method, requireLocalFetchMetadata, json, sanitizedEngineAvailability })) return;
       if (!hasToken(request, token)) throw new HostError('UNAUTHORIZED', 'A valid local session token is required.', 401);
       requireSameOrigin(request);
       const processing = requestProcessing(request, response);
-      if (await handlePluginPlatformRoute({ pathname, request, response, url, processing, pluginPackages, method, readJson, readBytes, requireContentType, json })) return;
-      if (await handleOcrRoute({ pathname, request, response, url, service, processing, method, json, readJson, normalizedOcrOptions, checkedOcrResult })) return;
-      if (await handlePortableProjectImportRoute({ pathname, request, response, url, processing, projectBundles, method, requireContentType, json })) return;
-      if (await handleComparisonBatchRoute({ pathname, request, response, processing, comparisons, method, readJson, json })) return;
-      if (await handleConversionRoute({
-        pathname, request, response, url, processing, store, inputs, conversion,
-        method, json, empty, readJson, requireContentType, decodeDisplayName,
-      })) return;
-      if (await handleDomainCatalogRoute({ pathname, request, response, domainFacade, method, json })) return;
-      if (await handleSigningIdentityListRoute({ pathname, request, response, url, signingIdentityDirectory, signingIdentityReady, processing, method, json })) return;
-      if (await handleScannerDiscoveryRoute({ pathname, request, response, url, processing, scannerDiscovery, scannerDiscoveryReady, method, readJson, json, exactJsonObject })) return;
-      if (await handleScannerAcquisitionRoute({ pathname, request, response, url, processing, scannerAcquisition, scannerAcquisitionReady, store, method, readJson, json, exactJsonObject })) return;
+      const routeContext = { ...context, pathname, request, response, url, processing, method, json, empty, readJson, readBytes, requireContentType, decodeDisplayName, exactJsonObject };
+      if (await handlePluginPlatformRoute(routeContext)) return;
+      if (await handleOcrRoute({ ...routeContext, normalizedOcrOptions, checkedOcrResult })) return;
+      if (await handlePortableProjectImportRoute(routeContext)) return;
+      if (await handleComparisonBatchRoute(routeContext)) return;
+      if (await handleConversionRoute(routeContext)) return;
+      if (await handleDomainCatalogRoute(routeContext)) return;
+      if (await handleSigningIdentityListRoute(routeContext)) return;
+      if (await handleScannerDiscoveryRoute(routeContext)) return;
+      if (await handleScannerAcquisitionRoute(routeContext)) return;
 
-      if (await handleDocumentRoutes({ pathname, request, response, url, processing, store, workspaceState,
-        routes: { workspace: handleWorkspaceRoute, workflow: handleWorkflowRoute, incrementalMetadata: handleIncrementalMetadataRoute,
-          incrementalBleedBox: handleIncrementalBleedBoxRoute, incrementalGoToLink: handleIncrementalGoToLinkRoute,
-          incrementalNamedDestination: handleIncrementalNamedDestinationRoute, incrementalPageVector: handleIncrementalPageVectorRoute, incrementalPageTransition: handleIncrementalPageTransitionRoute,
-          pageText: handlePageTextRoute, textReflow: handleTextReflowRoute, fileAudioAttachment: handleFileAudioAttachmentRoute, reviewMeasurement: handleReviewMeasurementRoute, reviewAnnotationImportExport: handleReviewAnnotationImportExportRoute, reviewSharedExchange: handleReviewSharedExchangeRoute, commentsToOffice: handleCommentsToOfficeRoute, reviewNotifications: handleReviewNotificationRoute, reviewSidecar: handleReviewSidecarRoute, formJavaScriptInventory: handleFormJavaScriptInventoryRoute, xfaInspection: handleXfaInspectionRoute, ooxmlExport: handleOoxmlExportRoute, ocrEditable: handleOcrEditableRoute, fullPageRedaction: handleFullPageRedactionRoute, fullPageRedactionBatch: handleFullPageRedactionBatchRoute, redactionOverlayLabel: handleRedactionOverlayLabelRoute, printerMarks: handlePrinterMarksRoute, pageBackground: handlePageBackgroundRoute, specialistContent: handleSpecialistContentRoute, layerDefaults: handleLayerDefaultsRoute,
-          certificateSign: handleCertificateSignRoute, electronicSigningIntent: handleElectronicSigningIntentRoute, hiddenDataSanitization: handleHiddenDataSanitizationRoute, acroFormCheckbox: handleAcroFormCheckboxRoute, acroFormRadio: handleAcroFormRadioRoute, acroFormTextField: handleAcroFormTextFieldRoute, acroFormSignatureField: handleAcroFormSignatureFieldRoute, acroFormBarcode: handleAcroFormBarcodeRoute, acroFormTabOrderTooltip: handleAcroFormTabOrderTooltipRoute, acroFormFillValidation: handleAcroFormFillValidationRoute, acroFormDataExport: handleAcroFormDataExportRoute, comparisonPackage: handleComparisonPackageRoute, aecMeasurementLegend: handleAecMeasurementLegendRoute,
-          taggedRemediation: handleTaggedRemediationRoute, professionalAccessibility: handleProfessionalAccessibilityRoute, jpegImage: handleJpegImageRoute, jpegImageReplacement: handleJpegImageReplacementRoute, pageLabels: handlePageLabelsRoute, advancedSearch: handleAdvancedSearchRoute, sensitivePatterns: handleSensitivePatternRoute, incrementalAccessibilityMetadata: handleIncrementalAccessibilityMetadataRoute,
-          removal: handleRemovalRoutes, fastWebView: handleFastWebViewRoute, copyPage: handleCopyPageRoute, pdfkit: handlePdfkitRoute, acroFormChoice: handleAcroFormChoiceRoute, batesNumbering: handleBatesNumberingRoute, documentService: handleDocumentServiceRoute },
-        limits: { incrementalMetadata: INCREMENTAL_METADATA_JSON_BODY_LIMIT, incrementalBleedBox: INCREMENTAL_BLEED_BOX_JSON_BODY_LIMIT,
-          incrementalGotoLink: INCREMENTAL_GOTO_LINK_JSON_BODY_LIMIT, incrementalNamedDestination: INCREMENTAL_NAMED_DESTINATION_JSON_BODY_LIMIT,
-          incrementalPageVector: INCREMENTAL_PAGE_VECTOR_JSON_BODY_LIMIT, incrementalPageTransition: INCREMENTAL_PAGE_TRANSITION_JSON_BODY_LIMIT, pageText: PAGE_TEXT_JSON_BODY_LIMIT, textReflow: TEXT_REFLOW_JSON_BODY_LIMIT, fileAudioAttachment: REVIEW_OPERATION_JSON_BODY_LIMIT, reviewMeasurement: REVIEW_OPERATION_JSON_BODY_LIMIT, reviewAnnotationImportExport: REVIEW_OPERATION_JSON_BODY_LIMIT, reviewSharedExchange: 1024 * 1024, commentsToOffice: REVIEW_OPERATION_JSON_BODY_LIMIT, reviewNotifications: REVIEW_OPERATION_JSON_BODY_LIMIT, reviewSidecar: REVIEW_OPERATION_JSON_BODY_LIMIT, formJavaScriptInventory: 2_048, xfaInspection: 2_048, fullPageRedaction: FULL_PAGE_REDACTION_JSON_BODY_LIMIT, fullPageRedactionBatch: FULL_PAGE_REDACTION_BATCH_JSON_BODY_LIMIT, printerMarks: PRINTER_MARKS_JSON_BODY_LIMIT, pageBackground: PAGE_BACKGROUND_JSON_BODY_LIMIT,
-          layerDefaults: LAYER_DEFAULTS_JSON_BODY_LIMIT, specialistContent: SPECIALIST_CONTENT_JSON_BODY_LIMIT, certificateSignature: CERTIFICATE_SIGNATURE_JSON_BODY_LIMIT, hiddenDataSanitization: HIDDEN_DATA_SANITIZATION_JSON_BODY_LIMIT, taggedRemediation: 128 * 1024, jpegImage: 2_048, jpegImageReplacement: 2_048, pageLabels: 8_192, advancedSearch: 4_096, sensitivePatterns: 8_192, redactionOverlayLabel: 4_096, acroFormFillSave: ACROFORM_FILL_SAVE_JSON_BODY_LIMIT, acroFormValidation: ACROFORM_VALIDATION_JSON_BODY_LIMIT, acroFormDataExport: ACROFORM_DATA_EXPORT_JSON_BODY_LIMIT,
-          incrementalAccessibilityMetadata: INCREMENTAL_ACCESSIBILITY_METADATA_JSON_BODY_LIMIT, copyPage: COPY_PAGE_JSON_BODY_LIMIT,
-          pdfkit: PDFKIT_TEXT_FIELD_WIDGET_JSON_BODY_LIMIT, ooxmlExport: OOXML_EXPORT_JSON_BODY_LIMIT, acroFormChoice: 16_384, batesNumbering: 8_192, fastWebView: FAST_WEB_VIEW_JSON_BODY_LIMIT, professionalAccessibility: PROFESSIONAL_ACCESSIBILITY_JSON_BODY_LIMIT, professionalPrintInspection: PROFESSIONAL_PRINT_INSPECTION_JSON_BODY_LIMIT, professionalPrintTransparency: PROFESSIONAL_PRINT_TRANSPARENCY_JSON_BODY_LIMIT, pdfkitMutation: PDFKIT_MUTATION_JSON_BODY_LIMIT, pdfkitProtection: PDFKIT_PROTECTION_JSON_BODY_LIMIT },
-        ...{ domainFacade, aecArtifacts, projectBundles, method, json, empty, write, readJson, readBytes, parsePositiveInteger, requireContentType,
-          sendPortableProject, rasterMutations, redactionPlans, comparisons, prepress, accessibilityReviews, accessibilityRemediations,
-          standardsValidations, redactionPlanReports, incrementalMetadata, incrementalBleedBox, incrementalGoToLink, incrementalNamedDestination,
-          incrementalPageVector, incrementalPageTransition, pageText, textReflow, fileAudioAttachments, reviewMeasurements, reviewAnnotationImportExport, reviewSharedExchange, commentsToOffice, reviewNotifications, reviewSidecar, formJavaScriptInventory, xfaInspection, fullPageRedaction, redactionOverlayLabels, printerMarks, pageBackground, specialistContent, specialistContentReady, layerDefaults, certificateSignature, signingIdentityReady, hiddenDataSanitization, taggedRemediation, taggedRemediationReady, jpegImage, jpegImageReady, pageLabels, pageLabelsReady, advancedSearch, advancedSearchReady, sensitivePatterns, incrementalAccessibilityMetadata,
-          javascriptRemoval, attachmentRemoval, annotationFlatten, fastWebView, ooxmlExport, ocrEditableOutput, acroFormCheckbox, acroFormRadio, acroFormTextField, acroFormSignatureField, acroFormBarcode, acroFormTabOrderTooltip, acroFormFillSave, acroFormValidation, acroFormDataExport, electronicSigningIntent, comparisonPackages, aecMeasurementLegend, jpegImageReplacement, jpegImageReplacementReady, professionalCapabilities, service, conversion, pdfkitInspections, pdfkitOutlineSplits, pdfkitMutations,
-          pdfkitProtection, pdfkitSanitization, pdfkitTextFieldWidget, acroFormChoice, batesNumbering, exactJsonObject, normalizedOcrOptions, checkedOcrResult, sendArtifact, parseSnapshotRegion }})) return;
+      if (await handleDocumentRoutes({ ...routeContext, routes: ROUTES, limits: LIMITS, write, parsePositiveInteger,
+        sendPortableProject, normalizedOcrOptions, checkedOcrResult, sendArtifact, parseSnapshotRegion })) return;
       if (await handleArtifactRoute({ pathname, request, response, url, store, method, empty, sendArtifact })) return;
       throw new HostError('NOT_FOUND', 'Local API endpoint not found.', 404);
     } catch (error) {

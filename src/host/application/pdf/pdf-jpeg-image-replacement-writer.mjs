@@ -1,9 +1,11 @@
-import { createHash } from 'node:crypto';
 import { PDF_JPEG_IMAGE_REPLACEMENT_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { pdfDictionary, pdfInteger, pdfReference } from './pdf-classic-syntax.mjs';
 import { parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { planPdfObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { tokenizePdfContentStream } from './pdf-content-stream-tokenizer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_JPEG_IMAGE_REPLACEMENT_PROFILE };
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
@@ -15,12 +17,9 @@ const UNSAFE_KEYS = new Set(['AA', 'A', 'AcroForm', 'AF', 'Collection', 'Encrypt
 const IMAGE_KEYS = new Set(['Type', 'Subtype', 'Width', 'Height', 'ColorSpace', 'BitsPerComponent', 'Filter', 'Length']);
 const OPERATOR_ARITIES = new Map([['q', 0], ['Q', 0], ['cm', 6], ['Do', 1]]);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message = 'The PDF JPEG replacement request is invalid.') { throw failure('INVALID_PDF_JPEG_IMAGE_REPLACEMENT', message); }
 function unsupported(message = 'The PDF is outside the supported bounded JPEG replacement subset.') { throw failure('UNSUPPORTED_PDF_JPEG_IMAGE_REPLACEMENT', message); }
 function invalidOutput(message = 'The PDF JPEG replacement output failed deterministic verification.') { throw failure('INVALID_PDF_JPEG_IMAGE_REPLACEMENT_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 function ref(value) { try { return pdfReference(value); } catch { unsupported(); } }
 function dict(value) { try { return pdfDictionary(value); } catch { unsupported(); } }
 function pdfNumber(value) { return Object.freeze({ type: 'number', value, integer: Number.isInteger(value), raw: String(value) }); }

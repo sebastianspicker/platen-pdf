@@ -1,9 +1,6 @@
+import { deepFreeze } from './deep-freeze.js';
+
 const UNIT_METERS = Object.freeze({ mm: 0.001, cm: 0.01, m: 1, in: 0.0254, ft: 0.3048 });
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
-}
 
 export const PDF_REVIEW_MEASUREMENT_PROFILE = 'platen-review-measurement-v1';
 export const REVIEW_MEASUREMENT_PROFILE = PDF_REVIEW_MEASUREMENT_PROFILE;

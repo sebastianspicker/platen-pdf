@@ -1,13 +1,12 @@
-import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { HostError } from '../../../platform/runtime/host-error.mjs';
 import { COMPARISON_PACKAGE_PROFILE } from '../../../application/review/comparison-package-service.mjs';
 import { validateComparisonPackage } from '../../../application/review/comparison-package-contract.mjs';
 import { scheduleArtifactCleanup } from './artifact-response-lifecycle.mjs';
+import { digest } from '../../../platform/runtime/digest.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const BODY_LIMIT = 2_048;
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 function validBody(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)

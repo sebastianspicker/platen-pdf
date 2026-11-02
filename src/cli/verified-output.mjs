@@ -28,9 +28,7 @@ function sameMetadata(first, second) {
     && (first.mode & 0o777) === (second.mode & 0o777)
     && first.size === second.size
     && first.dev === second.dev
-    && first.ino === second.ino
-    && first.mtimeNs === second.mtimeNs
-    && first.ctimeNs === second.ctimeNs;
+    && first.ino === second.ino;
 }
 
 async function removeVerifiedPublishedTarget(target, identity, { fail, syncDirectory }) {
@@ -131,11 +129,7 @@ export function createVerifiedWriter(dependencies) {
     } catch (error) {
       const hadPublishedIdentity = Boolean(identity);
       if (identity) {
-        try {
-          await removeVerifiedPublishedTarget(target, identity, { fail, syncDirectory });
-        } catch (cleanupError) {
-          throw cleanupError;
-        }
+        await removeVerifiedPublishedTarget(target, identity, { fail, syncDirectory });
         identity = null;
       }
       if (error?.code === 'JOB_CANCELLED') throw error;

@@ -11,10 +11,8 @@ import { handlers as redaction_sanitization } from './redaction-sanitization.mjs
 import { handlers as comparison } from './comparison.mjs';
 import { handlers as accessibility } from './accessibility.mjs';
 import { handlers as standards_preflight_print } from './standards-preflight-print.mjs';
-import { handlers as collaboration_dms } from './collaboration-dms.mjs';
 import { handlers as automation_headless } from './automation-headless.mjs';
 import { handlers as aec } from './aec.mjs';
-import { handlers as rich_media_3d_portfolios } from './rich-media-3d-portfolios.mjs';
 import { handlers as integrations_admin } from './integrations-admin.mjs';
 
 const ALL = Object.freeze({
@@ -31,10 +29,8 @@ const ALL = Object.freeze({
   ...comparison,
   ...accessibility,
   ...standards_preflight_print,
-  ...collaboration_dms,
   ...automation_headless,
   ...aec,
-  ...rich_media_3d_portfolios,
   ...integrations_admin,
 });
 

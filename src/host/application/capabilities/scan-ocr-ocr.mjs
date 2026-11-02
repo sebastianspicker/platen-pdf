@@ -110,11 +110,6 @@ export function ocrTableRecognition(ctx = {}) {
   const grid = rows.slice(0, 200).map((r) => (Array.isArray(r) ? r.map(String) : [String(r)]));
   return result('ocr.table-recognition', { method: 'local-ocr-table-grid', grid, rowCount: grid.length, colCount: Math.max(...grid.map((r) => r.length)) });
 }
-export function ocrUserDictionariesTraining(ctx = {}) {
-  const words = Array.isArray(ctx.words) ? ctx.words.map(String).slice(0, 500) : ['workbench', 'redaction', 'AcroForm'];
-  const dictId = createHash('sha256').update(words.join('|')).digest('hex').slice(0, 16);
-  return result('ocr.user-dictionaries-training', { method: 'local-ocr-user-dictionary', dictId, words, count: words.length });
-}
 export function ocrBatchRecognition(ctx = {}) {
   const items = Array.isArray(ctx.documents) ? ctx.documents.slice(0, 20) : [{ id: 'd1', text: 'Doc one' }, { id: 'd2', text: 'Doc two' }];
   const results = items.map((item, i) => {

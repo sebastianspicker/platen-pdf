@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary, serializePdfValue } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
@@ -7,6 +6,8 @@ import {
   normalizePdfAcroFormTabOrderTooltip,
   PDF_ACROFORM_TAB_ORDER_TOOLTIP_PROFILE,
 } from './pdf-acroform-tab-order-tooltip-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export const PDF_ACROFORM_TAB_ORDER_TOOLTIPS_PROFILE = PDF_ACROFORM_TAB_ORDER_TOOLTIP_PROFILE;
 export { PDF_ACROFORM_TAB_ORDER_TOOLTIP_PROFILE };
@@ -19,11 +20,9 @@ const ACTIVE_KEYS = new Set([
 ]);
 const SIGNATURE_NAMES = new Set(['Sig', 'DocTimeStamp']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message = 'The AcroForm tab-order and tooltip request is invalid.') { throw failure('INVALID_PDF_ACROFORM_TAB_ORDER_TOOLTIP', message); }
 function unsupported(message = 'The source PDF is outside the passive AcroForm tab-order and tooltip subset.') { throw failure('UNSUPPORTED_PDF_ACROFORM_TAB_ORDER_TOOLTIP_SOURCE', message); }
 function outputInvalid(message = 'The tab-order and tooltip output failed deterministic verification.') { throw failure('INVALID_PDF_ACROFORM_TAB_ORDER_TOOLTIP_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameRef(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
 function ref(value) { if (value?.type !== 'ref') unsupported('Indirect references are required for page annotations.'); return { type: 'ref', object: value.object, generation: value.generation }; }
 function plainReference(value) { return Object.freeze({ object: value.object, generation: value.generation }); }

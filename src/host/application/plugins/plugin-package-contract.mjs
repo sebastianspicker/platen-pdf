@@ -1,4 +1,6 @@
 import { HostError } from '../../platform/runtime/host-error.mjs';
+import { isPlainObject } from '../../platform/runtime/plain-object.mjs';
+export { isPlainObject } from '../../platform/runtime/plain-object.mjs';
 
 export const PACKAGE_LIMITS = Object.freeze({
   maxEncodedBytes: 256 * 1024,
@@ -23,11 +25,6 @@ export const TRUST_PUBLISHER_FIELDS = Object.freeze([
 
 export function packageFailure(code, message, status = 400) {
   throw new HostError(code, message, status);
-}
-
-export function isPlainObject(value) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype;
 }
 
 export function assertExactKeys(value, keys, label) {

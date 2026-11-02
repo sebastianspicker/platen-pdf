@@ -1,10 +1,11 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary, serializePdfValue } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { tokenizePdfContentStream } from './pdf-content-stream-tokenizer.mjs';
 import { normalizePdfAccessibilityTableSemantics, PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE } from './pdf-accessibility-table-semantics-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const HAZARD_KEYS = new Set(['A', 'AA', 'AcroForm', 'AF', 'Annots', 'ByteRange', 'Collection', 'Dests', 'EF', 'EmbeddedFiles', 'Encrypt', 'JS', 'Metadata', 'Names', 'OC', 'OCG', 'OCGs', 'OCProperties', 'OpenAction', 'Perms', 'PieceInfo', 'PresSteps', 'RichMediaContent', 'Sound', 'Movie', 'XFA']);
 const HAZARD_TYPES = new Set(['Action', 'Annot', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig', 'ObjStm', 'XRef']);
@@ -12,10 +13,8 @@ const HAZARD_SUBTYPES = new Set(['3D', 'FileAttachment', 'Movie', 'PS', 'Project
 const SAFE_STRUCT_KEYS = new Set(['Type', 'S', 'P', 'K', 'Pg', 'MCID', 'ParentTree', 'ParentTreeNextKey', 'RoleMap', 'MarkInfo', 'Marked', 'StructTreeRoot', 'StructParents']);
 const ACTIONS = new Set(['JavaScript', 'URI', 'Launch', 'GoTo', 'SubmitForm', 'ResetForm', 'ImportData', 'Named']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The source is outside the bounded table-semantics subset.') { throw failure('UNSUPPORTED_PDF_ACCESSIBILITY_TABLE_SEMANTICS', message); }
 function invalidOutput(message = 'Table semantics output proof failed.') { throw failure('INVALID_PDF_ACCESSIBILITY_TABLE_SEMANTICS_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function ref(value) { if (value?.type !== 'ref') unsupported('Indirect references are required.'); return Object.freeze({ type: 'ref', object: value.object, generation: value.generation }); }
 function sameRef(a, b) { return a?.object === b?.object && a?.generation === b?.generation; }
 function name(value) { return Object.freeze({ type: 'name', value }); }

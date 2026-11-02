@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -6,6 +5,7 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { buildPdfHiddenDataSanitization, inspectPdfHiddenDataSanitization, PDF_HIDDEN_DATA_SANITIZER_PROFILE, MAX_PDF_HIDDEN_DATA_SANITIZER_OUTPUT_BYTES, MAX_PDF_HIDDEN_DATA_SANITIZER_SOURCE_BYTES } from './pdf-hidden-data-sanitizer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_HIDDEN_DATA_SANITIZATION_JOB_MS = 120_000;
 export const HIDDEN_DATA_SANITIZATION_BEFORE_FILES = Object.freeze([]);
@@ -14,7 +14,6 @@ const PRIVATE_SOURCE_MODE = 0o400;
 const PRIVATE_OUTPUT_MODE = 0o600;
 
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameIdentity(left, right) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => left[key] === right[key]); }
 
 function throwIfAborted(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'Hidden-data sanitization was cancelled.', 499, signal.reason); }

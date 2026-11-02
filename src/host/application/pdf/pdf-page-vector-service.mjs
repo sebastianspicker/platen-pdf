@@ -30,6 +30,7 @@ import {
   writeIncrementalPdfPageVector,
 } from './pdf-page-vector-writer.mjs';
 import { runPageVectorUpdate } from './pdf-page-vector-job.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 const MAX_JOB_MS = 2 * 60_000;
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -95,12 +96,6 @@ function checkedRequest(core, value) {
 
 function throwIfAborted(signal) {
   if (signal.aborted) throw signal.reason ?? new Error('Incremental page-vector processing was cancelled.');
-}
-
-function overlap(left, right) {
-  return left.buffer === right.buffer
-    && left.byteOffset < right.byteOffset + right.byteLength
-    && right.byteOffset < left.byteOffset + left.byteLength;
 }
 
 function assertProof(proof, sourceLength, outputLength, request) {

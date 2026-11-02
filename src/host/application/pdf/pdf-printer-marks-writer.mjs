@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary, pdfReference } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
@@ -10,6 +9,8 @@ import {
   writePageContentFoundation,
 } from './pdf-page-content-foundation.mjs';
 import { PDF_PRINTER_MARKS_PROFILE, normalizePdfPrinterMarks } from './pdf-printer-marks-admission.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_PRINTER_MARKS_PROFILE };
 
@@ -18,10 +19,8 @@ const UNSAFE_KEYS = new Set(['A', 'AA', 'AcroForm', 'AF', 'Annots', 'Collection'
 const UNSAFE_TYPES = new Set(['Action', 'Annot', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig', 'StructElem']);
 const MIN_MARGIN = 4;
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the supported bounded printer-marks subset.') { return failure('UNSUPPORTED_PDF_PRINTER_MARKS', message); }
 function invalidOutput(message = 'PDF printer-marks output proof failed.') { return failure('INVALID_PDF_PRINTER_MARKS_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameReference(a, b) { return a?.object === b?.object && a?.generation === b?.generation; }
 function key(reference) { return `${reference.object}:${reference.generation}`; }
 

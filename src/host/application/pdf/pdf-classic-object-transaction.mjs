@@ -19,16 +19,11 @@ import {
 } from './pdf-classic-object-value.mjs';
 export { authorizePdfObjectDeletion } from './pdf-incremental-deletion-validation.mjs';
 import { admitPdfDeletions } from './pdf-incremental-deletion-validation.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_TRANSACTION_RECORDS = 10_000;
 const ADDITION_ID = /^[a-z][a-z0-9_-]{0,63}$/u;
 const pendingReferences = new WeakMap();
-
-function failure(code, message) {
-  const error = new Error(message);
-  error.code = code;
-  return error;
-}
 
 function invalid() {
   return failure(

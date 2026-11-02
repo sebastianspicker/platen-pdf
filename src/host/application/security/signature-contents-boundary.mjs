@@ -2,6 +2,7 @@ import { constants as fsConstants } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { isAbsolute } from 'node:path';
 import { HostError } from '../../platform/runtime/host-error.mjs';
+import { sameIdentity } from '../../platform/runtime/file-identity.mjs';
 
 const MAX_TOKEN_OVERHEAD_BYTES = 4 * 1024;
 const PDF_WHITESPACE = new Set([0x00, 0x09, 0x0a, 0x0c, 0x0d, 0x20]);
@@ -101,11 +102,6 @@ export function decodedPdfStringLength(bytes) {
   if (end - start < 2) throw boundaryError();
   if (bytes[start] === 0x3c) return hexStringLength(bytes, start, end);
   return literalStringLength(bytes, start, end);
-}
-
-function sameIdentity(left, right) {
-  return left.dev === right.dev && left.ino === right.ino && left.size === right.size
-    && left.mtimeNs === right.mtimeNs && left.ctimeNs === right.ctimeNs;
 }
 
 function checkedLimits(maxBytesPerSignature, maxBytesTotal) {

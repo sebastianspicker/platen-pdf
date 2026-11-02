@@ -1,6 +1,6 @@
-import { createHash } from 'node:crypto';
 import { isProxy } from 'node:util/types';
 import { PDF_ACROFORM_DATA_EXPORT_KIND, PDF_ACROFORM_DATA_EXPORT_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export { PDF_ACROFORM_DATA_EXPORT_KIND, PDF_ACROFORM_DATA_EXPORT_PROFILE };
 export const PDF_ACROFORM_DATA_EXPORT_MAX_CSV_BYTES = 8_192;
@@ -24,7 +24,6 @@ function dense(value, expected) {
   const descriptors = Object.getOwnPropertyDescriptors(value);
   return Object.hasOwn(descriptors.length, 'value') && descriptors.length.enumerable === false && Array.from({ length: expected.length }, (_, index) => descriptors[index]).every((item, index) => item && Object.hasOwn(item, 'value') && item.enumerable === true && typeof item.value === 'string' && item.value === expected[index]);
 }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function wellFormed(value) {
   for (let index = 0; index < value.length; index += 1) { const unit = value.charCodeAt(index); if (unit >= 0xd800 && unit <= 0xdbff) { const next = value.charCodeAt(index + 1); if (!(next >= 0xdc00 && next <= 0xdfff)) return false; index += 1; } else if (unit >= 0xdc00 && unit <= 0xdfff) return false; }
   return true;

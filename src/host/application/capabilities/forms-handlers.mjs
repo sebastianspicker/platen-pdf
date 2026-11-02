@@ -26,7 +26,6 @@ import { digest } from './fixtures.mjs';
 import {
   formsString,
   mutationResult,
-  rejectDemoSource,
   runWriter,
   signatureRequest,
   sourceBoundFillSave,
@@ -47,61 +46,6 @@ const handlers = Object.freeze({
       sourceProvided: bound.supplied, demoFixtureUsed: bound.demoFixtureUsed, professionalProof: false,
       proofStatus: 'partial', validationBoundary: 'independent-source-bound-widget-reopen',
       proof: Object.freeze({ sourceSha256: bound.sourceSha256, fieldType: filled.fieldType, widgetReference: filled.widgetReference, semanticValueValidated: true, sourcePrefixPreserved: true, revisionCount: 2 }),
-    });
-  },
-
-  async 'forms.calculate'(ctx = {}) {
-    rejectDemoSource(ctx);
-    let a;
-    let b;
-    try {
-      a = Number(ctx.a ?? 2);
-      b = Number(ctx.b ?? 3);
-    } catch {
-      fail('FORM_CALCULATE_INVALID_REQUEST', 'Finite numeric operands are required.', 400);
-    }
-    const operation = ctx.operation ?? 'add';
-    if (!Number.isFinite(a) || !Number.isFinite(b) || !['add', 'subtract', 'multiply', 'divide'].includes(operation)) {
-      fail('FORM_CALCULATE_INVALID_REQUEST', 'Finite operands and one allowlisted operation are required.', 400);
-    }
-    if (operation === 'divide' && b === 0) fail('FORM_CALCULATE_INVALID_REQUEST', 'Division by zero is rejected.', 400);
-    const values = { add: a + b, subtract: a - b, multiply: a * b, divide: a / b };
-    const calculation = values[operation];
-    if (!Number.isFinite(calculation)) fail('FORM_CALCULATE_OUTPUT_INVALID', 'The calculation result is not finite.', 502);
-    if (values[operation] !== calculation) fail('FORM_CALCULATE_OUTPUT_INVALID', 'Recomputed calculation validation failed.', 502);
-    return result('forms.calculate', {
-      familyId: FAMILY,
-      method: 'local-safe-arithmetic-calculate',
-      expression: operation === 'add' ? 'a+b' : operation === 'subtract' ? 'a-b' : operation === 'multiply' ? 'a*b' : 'a/b',
-      a,
-      b,
-      operation,
-      result: calculation,
-      scope: 'detached-allowlisted-arithmetic',
-      professionalProof: false,
-      proofStatus: 'partial',
-    });
-  },
-
-  async 'forms.distribute-collect'(ctx = {}) {
-    const responses = Array.isArray(ctx.responses) ? ctx.responses : [{ id: 'r1', values: { Name: 'Ada' } }];
-    return result('forms.distribute-collect', {
-      familyId: FAMILY,
-      method: 'local-form-response-collection',
-      responses: responses.slice(0, 100),
-      count: Math.min(responses.length, 100),
-    });
-  },
-
-  async 'forms.submit-reset'(ctx = {}) {
-    const action = ctx.action === 'reset' ? 'reset' : 'submit';
-    const values = ctx.values && typeof ctx.values === 'object' ? ctx.values : { Name: 'Ada' };
-    return result('forms.submit-reset', {
-      familyId: FAMILY,
-      method: 'local-form-submit-reset',
-      action,
-      values: action === 'reset' ? {} : values,
-      submitted: action === 'submit',
     });
   },
 
@@ -143,10 +87,6 @@ const handlers = Object.freeze({
       barcodeId: proof.payloadSha256,
       request,
     });
-  },
-
-  async 'forms.flatten'(ctx = {}) {
-    fail('FORM_FLATTEN_UNSUPPORTED', 'Form flattening is outside the bounded local forms subset.', 422);
   },
 
   async 'forms.signature-fields'(ctx = {}) {

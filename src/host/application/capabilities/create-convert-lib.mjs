@@ -34,7 +34,6 @@ export const CREATE_CONVERT_CAPABILITY_IDS = Object.freeze([
 
 export const MAX_PAGE_POINTS = 14_400;
 export const MIN_PAGE_POINTS = 72;
-export const MAX_COMBINE_SOURCES = 32;
 const SHA_256_HEX = /^[0-9a-f]{64}$/u;
 
 export function digest(bytes) {

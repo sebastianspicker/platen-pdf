@@ -1,6 +1,4 @@
 import {
-  scanAcquire as scannerAcquire,
-  scanDuplexFeeder as scannerDuplexFeeder,
   scanAppendToDocument as scannerAppendToDocument,
 } from './scan-ocr-scanner.mjs';
 import {
@@ -11,7 +9,6 @@ import {
   ocrLanguageDetectionSelection,
   ocrZonesLayout,
   ocrTableRecognition,
-  ocrUserDictionariesTraining,
   ocrBatchRecognition,
   ocrExportLayoutPreserving,
   ocrScreenshotCapture,
@@ -19,23 +16,10 @@ import {
 import { readFileSync } from 'node:fs';
 import { OPAQUE_ID } from '../../platform/storage/document-store-contract.mjs';
 import { validateOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
-import { SCANNER_DUPLEX_MAX_PAGES } from '../ocr/scanner-duplex-contract.mjs';
 import { PDF_COPY_PAGE_VALIDATORS, PDF_COPY_PAGE_PROFILE } from '../pdf/pdf-copy-page-admission.mjs';
 import { fail, sha256 } from './support.mjs';
 
 const DIGEST = /^[0-9a-f]{64}$/u;
-
-function duplexInput(ctx) {
-  if (ctx.sides !== undefined && ctx.sides !== 'duplex') {
-    fail('INVALID_DUPLEX_SIDES', 'scan.duplex-feeder accepts duplex sides only.', 400);
-  }
-  const sheets = ctx.sheets === undefined ? 1 : ctx.sheets;
-  if (!Number.isSafeInteger(sheets) || sheets < 1 || sheets > SCANNER_DUPLEX_MAX_PAGES / 2) {
-    fail('INVALID_SHEETS', `sheets 1..${SCANNER_DUPLEX_MAX_PAGES / 2}`, 400);
-  }
-  if (ctx.network === true) fail('NETWORK_FORBIDDEN', 'Scanner acquisition is local-only.', 403);
-  return Object.freeze({ sheets, pageCount: sheets * 2 });
-}
 
 function documentRecord(store, id, role) {
   if (!OPAQUE_ID.test(String(id ?? ''))) {
@@ -113,19 +97,6 @@ function exactAppendProvenance(operation, { primary, secondary }, afterPage) {
   return checked;
 }
 
-async function scanDuplexFeeder(ctx = {}) {
-  duplexInput(ctx);
-  if (ctx.service === undefined || ctx.store === undefined) {
-    // Preserve the service-owned availability error, but only after input validation.
-    return scannerDuplexFeeder(ctx);
-  }
-  const result = await scannerDuplexFeeder(ctx);
-  if (result.receipt?.sha256 && result.outputSha256 !== result.receipt.sha256) {
-    fail('SCAN_DUPLEX_OUTPUT_INVALID', 'scan.duplex-feeder output digest drifted from its document receipt.', 502);
-  }
-  return result;
-}
-
 async function scanAppendToDocument(ctx = {}) {
   if (ctx.network === true) fail('NETWORK_FORBIDDEN', 'Scanner acquisition is local-only.', 403);
   const sources = await verifyAppendSources(ctx);
@@ -153,11 +124,7 @@ async function scanAppendToDocument(ctx = {}) {
   return Object.freeze({ ...result, operation, pdf: bytes, bytes, outputSha256: artifact.sha256, outputDigest: artifact.sha256 });
 }
 
-const scanAcquire = scannerAcquire;
-
 export {
-  scanAcquire,
-  scanDuplexFeeder,
   scanAppendToDocument,
   ocrRecognizeText,
   ocrCleanup,
@@ -166,15 +133,12 @@ export {
   ocrLanguageDetectionSelection,
   ocrZonesLayout,
   ocrTableRecognition,
-  ocrUserDictionariesTraining,
   ocrBatchRecognition,
   ocrExportLayoutPreserving,
   ocrScreenshotCapture,
 };
 
 export const handlers = Object.freeze({
-  async 'scan.acquire'(ctx = {}) { return scanAcquire(ctx); },
-  async 'scan.duplex-feeder'(ctx = {}) { return scanDuplexFeeder(ctx); },
   async 'scan.append-to-document'(ctx = {}) { return scanAppendToDocument(ctx); },
   async 'ocr.recognize-text'(ctx = {}) { return ocrRecognizeText(ctx); },
   async 'ocr.cleanup'(ctx = {}) { return ocrCleanup(ctx); },
@@ -183,7 +147,6 @@ export const handlers = Object.freeze({
   async 'ocr.language-detection-selection'(ctx = {}) { return ocrLanguageDetectionSelection(ctx); },
   async 'ocr.zones-layout'(ctx = {}) { return ocrZonesLayout(ctx); },
   async 'ocr.table-recognition'(ctx = {}) { return ocrTableRecognition(ctx); },
-  async 'ocr.user-dictionaries-training'(ctx = {}) { return ocrUserDictionariesTraining(ctx); },
   async 'ocr.batch-recognition'(ctx = {}) { return ocrBatchRecognition(ctx); },
   async 'ocr.export-layout-preserving'(ctx = {}) { return ocrExportLayoutPreserving(ctx); },
   async 'ocr.screenshot-capture'(ctx = {}) { return ocrScreenshotCapture(ctx); },

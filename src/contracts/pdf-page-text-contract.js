@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const PDF_PAGE_TEXT_PROFILE = 'local-page-text-run-v1';
 export const PDF_PAGE_TEXT_VALIDATORS = Object.freeze([
@@ -22,11 +23,6 @@ const EVIDENCE_KEYS = Object.freeze([
   'targetPageRenderDiffered', 'otherPageRendersMatched', 'outputUnsigned',
   'artifactDigestBound', 'sourceUnchanged', 'localOnly',
 ]);
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
-}
 
 export function validPageTextRequest(value) {
   return exactObject(value, ['page', 'x', 'y', 'size', 'text'])
