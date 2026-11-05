@@ -7,6 +7,8 @@ produces separately validated derived artifacts. Processing uses fixed local
 adapters and optional native helpers; it does not upload documents or download
 engines at runtime.
 
+> _Claude was used to polish and proof-read the code and documentation of this repository._
+
 <details>
 <summary>Status and limitations</summary>
 
@@ -39,6 +41,9 @@ flowchart LR
     Local --> Derived[Separate derived document]
     Derived --> Review[Validation report and human review]
 ```
+
+For what runs where, the request path of a browser or CLI operation, where
+session files live, and a code map, see [docs/architecture.md](docs/architecture.md).
 
 ## Scope and limits
 
@@ -144,7 +149,7 @@ tag, publish, sign, notarize, or distribute a release.
 
 | Document | Purpose |
 | --- | --- |
-| [Architecture](docs/architecture.md) | Physical host layers and dependency directions |
+| [Architecture](docs/architecture.md) | Runtime overview, user journeys, session storage, host layers, code map |
 | [ADR 0001](docs/decisions/0001-modular-monolith-contracts-bootstrap.md) | Modular-monolith and composition rationale |
 | [ADR 0002](docs/decisions/0002-bounded-runtime-registries.md) | Closed allowlisted dispatch registries |
 | [Capability coverage](docs/capability-coverage.md) | Evidence and limits for capability records |
