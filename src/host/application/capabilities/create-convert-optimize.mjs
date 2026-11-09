@@ -1,5 +1,3 @@
-import { HostError } from '../../platform/runtime/host-error.mjs';
-import { PDF_FAST_WEB_VIEW_PROFILE } from '../../../contracts/pdf-fast-web-view-contract.js';
 import { buildPdfCompactRewrite } from '../pdf/pdf-compact-rewrite.mjs';
 import {
   digest,
@@ -39,30 +37,5 @@ export async function optimizeCompress(context = {}) {
     reachableObjectCount: rewritten.summary.reachableObjectCount,
     sourceSha256: digest(source),
     path: 'buildPdfCompactRewrite',
-  });
-}
-
-export async function optimizeFastWebView(context = {}) {
-  if (typeof context?.fastWebView?.linearize !== 'function'
-    || typeof context?.documentId !== 'string' || context.documentId.length === 0
-    || typeof context?.sourceSha256 !== 'string' || context.sourceSha256.length === 0) {
-    throw new HostError(
-      'FAST_WEB_VIEW_UNAVAILABLE',
-      'Fast web view requires the validated qpdf service and a source-bound document.',
-      503,
-    );
-  }
-  const linearized = await context.fastWebView.linearize(context.documentId, {
-    profile: PDF_FAST_WEB_VIEW_PROFILE,
-  }, { sourceSha256: context.sourceSha256, signal: context.signal });
-  return result('optimize.fast-web-view', {
-    artifactId: linearized.artifact?.id ?? null,
-    sourceDigest: linearized.sourceDigest,
-    engine: linearized.engine,
-    evidence: linearized.evidence,
-    limitations: linearized.limitations,
-    linearized: true,
-    mediaType: 'application/pdf',
-    path: 'validated-qpdf-service',
   });
 }

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { validateAecMeasurementResult } from '../../../contracts/aec-contract.js';
+import { deepFreeze } from '../../../contracts/deep-freeze.js';
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
@@ -108,12 +109,6 @@ export function normalizeAecMeasurementLegendRequest(value) {
     ids.add(measurement.id); provenance.add(measurement.provenanceSha256);
   }
   return deepFreeze({ sourceSha256, expectedRevision, records });
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 export function createAecMeasurementLegend(value, { signal } = {}) {

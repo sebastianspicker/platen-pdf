@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { HostError } from '../../platform/runtime/host-error.mjs';
 import { validateOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
@@ -6,6 +5,7 @@ import { parsePageDimensions, parsePdfInfo, parseTextPages } from '../pdf/pdf-ev
 import { readRegularOutput } from '../../platform/runtime/bounded-output-io.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { runConversionJob } from './conversion-job-runtime.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_OPTIMIZE_EXPORT_BYTES = 64 * 1024 * 1024;
 export const MAX_OPTIMIZE_EXPORT_PAGES = 200;
@@ -31,10 +31,6 @@ function runOptions(workspace, signal, bytes, timeoutMs, maxStdoutBytes) {
 
 function assertNotAborted(signal) {
   if (signal?.aborted) throw signal.reason ?? new HostError('JOB_CANCELLED', 'Optimization export was cancelled.', 499);
-}
-
-function digest(bytes) {
-  return createHash('sha256').update(bytes).digest('hex');
 }
 
 function textDigest(pages) {

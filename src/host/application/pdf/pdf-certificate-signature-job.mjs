@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -12,6 +11,7 @@ import {
   preparePdfSignatureContainer,
 } from './pdf-signature-container-writer.mjs';
 import { createSigningIdentityRequestPath } from '../../platform/adapters/signing-identity.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const CERTIFICATE_SIGNATURE_PROFILE = 'local-pdf-certificate-signature-v1';
 export const MAX_CERTIFICATE_SIGNATURE_SOURCE_BYTES = 32 * 1024 * 1024;
@@ -33,8 +33,6 @@ function fail(code, message, status = 502, cause) {
 export function throwIfCertificateSignatureAborted(signal) {
   if (signal?.aborted) fail('JOB_CANCELLED', 'Certificate signature processing was cancelled.', 499, signal.reason);
 }
-
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 function sameIdentity(left, right) {
   return left.dev === right.dev && left.ino === right.ino && left.nlink === right.nlink

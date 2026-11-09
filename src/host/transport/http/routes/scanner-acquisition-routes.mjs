@@ -8,6 +8,7 @@ import {
 } from '../../../application/ocr/scanner-acquisition-contract.mjs';
 import { validateOperationProvenance } from '../../../platform/storage/operation-provenance.mjs';
 import { scheduleDocumentCleanup } from './artifact-response-lifecycle.mjs';
+import { sameJson } from '../../../../contracts/same-json.js';
 
 const DEVICE_ID = /^scanner-[0-9a-f]{32}$/u;
 const DOCUMENT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -26,10 +27,6 @@ function exact(value, keys) {
       && keys.every((key) => descriptors[key]?.enumerable === true
         && Object.hasOwn(descriptors[key], 'value'));
   } catch { return false; }
-}
-
-function sameJson(left, right) {
-  try { return JSON.stringify(left) === JSON.stringify(right); } catch { return false; }
 }
 
 function validTimestamp(value) {

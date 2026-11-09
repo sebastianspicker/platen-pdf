@@ -1,9 +1,10 @@
-import { createHash } from 'node:crypto';
 import { PDF_ACROFORM_CHOICE_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_ACROFORM_CHOICE_PROFILE };
 const MAX_SOURCE = 32 * 1024 * 1024;
@@ -11,11 +12,9 @@ const MAX_PAGES = 10_000;
 const MAX_OPTIONS = 50;
 const MAX_COORDINATE = 1_000_000;
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message = 'The AcroForm choice request is invalid.') { throw failure('INVALID_PDF_ACROFORM_CHOICE', message); }
 function unsupported(message = 'The source PDF is outside the supported passive AcroForm choice subset.') { throw failure('UNSUPPORTED_PDF_ACROFORM_CHOICE_SOURCE', message); }
 function outputInvalid(message = 'The AcroForm choice output failed deterministic verification.') { throw failure('INVALID_PDF_ACROFORM_CHOICE_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function name(value) { return Object.freeze({ type: 'name', value }); }
 function number(value, raw) { return Object.freeze({ type: 'number', value, integer: Number.isSafeInteger(value), ...(raw ? { raw } : {}) }); }
 function array(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }

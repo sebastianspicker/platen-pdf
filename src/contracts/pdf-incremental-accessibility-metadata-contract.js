@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const INCREMENTAL_ACCESSIBILITY_METADATA_PROFILE = 'local-incremental-document-language-title-v1';
 export const INCREMENTAL_ACCESSIBILITY_METADATA_FIELDS = Object.freeze([
@@ -49,11 +50,6 @@ function hasUnpairedSurrogate(value) {
     } else if (unit >= 0xdc00 && unit <= 0xdfff) return true;
   }
   return false;
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 export function validIncrementalAccessibilityMetadata(value) {

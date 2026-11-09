@@ -77,7 +77,7 @@ function readCompressedData(bytes, record) {
 }
 
 function decompressEntry(compressedData, record) {
-  try { return record.method === 0 ? Buffer.from(compressedData) : inflateRawSync(compressedData); } catch { throw archiveError('INVALID_ARCHIVE', 'The ZIP entry could not be decompressed.'); }
+  try { return record.method === 0 ? Buffer.from(compressedData) : inflateRawSync(compressedData, { maxOutputLength: Math.max(1, record.uncompressedSize) }); } catch { throw archiveError('INVALID_ARCHIVE', 'The ZIP entry could not be decompressed.'); }
 }
 
 function validateEntryIntegrity(data, record) {

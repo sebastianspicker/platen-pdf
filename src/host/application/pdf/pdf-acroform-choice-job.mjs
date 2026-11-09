@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -6,13 +5,13 @@ import { HostError } from '../../platform/runtime/host-error.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { inspectPdfAcroFormChoice, PDF_ACROFORM_CHOICE_PROFILE, preparePdfAcroFormChoice } from './pdf-acroform-choice-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACROFORM_CHOICE_JOB_MS = 120_000;
 export const MAX_PDF_ACROFORM_CHOICE_SOURCE_BYTES = 32 * 1024 * 1024;
 export const MAX_PDF_ACROFORM_CHOICE_OUTPUT_BYTES = MAX_PDF_ACROFORM_CHOICE_SOURCE_BYTES + 512 * 1024;
 
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function identity(left, right) { return ['dev', 'ino', 'nlink', 'size', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => left[key] === right[key]); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'AcroForm choice processing was cancelled.', 499, signal.reason); }
 

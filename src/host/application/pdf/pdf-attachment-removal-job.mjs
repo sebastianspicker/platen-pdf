@@ -26,6 +26,7 @@ import {
   sourceSupported,
   writePrivatePdfAttachmentRemovalOutput,
 } from './pdf-attachment-removal-validation.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 function fail(code, message, status = 502) {
   throw new HostError(code, message, status);
@@ -35,12 +36,6 @@ function aborted(signal) {
   if (signal.aborted) {
     throw signal.reason ?? new Error('Attachment removal was cancelled.');
   }
-}
-
-function overlap(left, right) {
-  return left.buffer === right.buffer
-    && left.byteOffset < right.byteOffset + right.byteLength
-    && right.byteOffset < left.byteOffset + left.byteLength;
 }
 
 async function snapshot(poppler, input, workspace, signatureWorkspace, signal) {

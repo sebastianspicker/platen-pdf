@@ -4,6 +4,7 @@ import {
   validatePdfReviewMeasurementResult,
 } from './pdf-review-measurement-contract.mjs';
 import { OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { deepFreeze } from './deep-freeze.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
@@ -127,10 +128,4 @@ export function validateReviewMeasurementResult(result, { documentId, request } 
     || !validArtifact(result.artifact, { documentId, sourceSha256: normalized.sourceSha256, measurement: result.measurement, receipt: result.receipt })
     || !dense(result.limitations, 1, 16) || result.limitations.some((entry) => typeof entry !== 'string' || entry.length < 1 || entry.length > 240)) invalidResult();
   return deepFreeze(result);
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }

@@ -3,6 +3,7 @@ import { isProxy } from 'node:util/types';
 import { PDF_ACROFORM_FILL_SAVE_PROFILE } from '../../../application/pdf/pdf-acroform-fill-save-writer.mjs';
 import { PDF_ACROFORM_VALIDATION_PROFILE } from '../../../application/pdf/pdf-acroform-validation-service.mjs';
 import { scheduleArtifactCleanup } from './artifact-response-lifecycle.mjs';
+import { canonicalTimestamp } from '../../../../contracts/canonical-timestamp.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -25,12 +26,6 @@ function exact(value, keys) {
 
 function plainExact(value, keys) {
   return exact(value, keys) && Object.getPrototypeOf(value) === Object.prototype;
-}
-
-function canonicalTimestamp(value) {
-  if (typeof value !== 'string') return false;
-  const parsed = new Date(value);
-  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
 }
 
 function boundedText(value, maximum = 127, minimum = 1) {

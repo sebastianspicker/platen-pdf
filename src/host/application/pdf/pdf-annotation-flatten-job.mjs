@@ -15,10 +15,10 @@ import {
   pdfAnnotationFlattenSourceSupported, readStablePdfAnnotationFlatten,
   writePrivatePdfAnnotationFlattenOutput,
 } from './pdf-annotation-flatten-validation.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 function fail(code, message, status = 502) { throw new HostError(code, message, status); }
 function aborted(signal) { if (signal.aborted) throw signal.reason ?? new Error('Annotation flatten processing was cancelled.'); }
-function overlap(left, right) { return left.buffer === right.buffer && left.byteOffset < right.byteOffset + right.byteLength && right.byteOffset < left.byteOffset + left.byteLength; }
 
 async function snapshot(poppler, input, workspace, signatureWorkspace, signal, { source = false } = {}) {
   const [envelope, signatures] = await Promise.all([

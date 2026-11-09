@@ -7,17 +7,12 @@ import {
   inspectIncrementalAecMeasureDictionary,
   writeIncrementalAecMeasureDictionary,
 } from '../pdf/pdf-aec-measure-writer.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 const MINIMUM_PDF_BYTES = 64;
 
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
-}
-
-function overlap(left, right) {
-  return left.buffer === right.buffer
-    && left.byteOffset < right.byteOffset + right.byteLength
-    && right.byteOffset < left.byteOffset + left.byteLength;
 }
 
 async function readOutput(path, maximumBytes, label) {

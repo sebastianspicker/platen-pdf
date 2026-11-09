@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { chmod, lstat, open, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
@@ -15,6 +14,7 @@ import {
   writeTaggedPdfRemediation,
 } from './pdf-tagged-remediation-writer.mjs';
 import { createOperationProvenance } from '../../platform/storage/operation-provenance.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const SHA256 = /^[a-f0-9]{64}$/u;
 const MAX_JOB_MS = 120_000;
@@ -70,8 +70,6 @@ function checkedRequest(core, value) {
     throw error;
   }
 }
-
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 async function writePrivateOutput(path, bytes, signal) {
   cancelled(signal);

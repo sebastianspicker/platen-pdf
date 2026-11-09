@@ -1,11 +1,5 @@
 # Platen
 
-> [!NOTE]
-> **Development paused.** [PdfCraft](https://github.com/storytold/pdfcraft)
-> follows almost the same idea and is a working product, whereas Platen is
-> still a prototype. Until further notice I will not develop Platen further as
-> a product; if you need a working tool, use PdfCraft. This repository stays
-> available as-is for reference. I enjoyed the ride nonetheless.
 
 Platen is a local-first PDF workbench with a browser UI, a CLI, and a
 token-authenticated loopback host. It keeps source documents immutable and
@@ -13,10 +7,43 @@ produces separately validated derived artifacts. Processing uses fixed local
 adapters and optional native helpers; it does not upload documents or download
 engines at runtime.
 
+> _Claude was used to polish and proof-read the code and documentation of this repository._
+
+<details>
+<summary>Status and limitations</summary>
+
+**Development paused; independent prototype.** I developed Platen independently
+alongside my main professional work. It remains a prototype and a starting point for
+adaptation, rather than a ready-to-use PDF product.
+[PdfCraft](https://github.com/storytold/pdfcraft) follows almost the same idea and is
+a working product; if you need a working tool, use PdfCraft. Until further notice I
+will not develop Platen further as a product. This repository stays available as-is
+for reference. I enjoyed the ride nonetheless.
+
+**Disclaimer.** Review and validate derived documents before relying on them. The
+capability and validation limits below still apply, including those for accessibility,
+prepress and signatures. You are responsible for judging the output's suitability for
+your use.
+
+</details>
+
 `0.3.0-alpha.1` is a public-alpha candidate and, with development paused, will
 not be published as a release. Interfaces, output contracts, and capability
 classifications are unstable. Use independent review before relying on any
 output in unattended or production work.
+
+## How it works
+
+```mermaid
+flowchart LR
+    Source[Original PDF remains unchanged] --> Entry[Browser or command line]
+    Entry --> Local[Local application services and adapters]
+    Local --> Derived[Separate derived document]
+    Derived --> Review[Validation report and human review]
+```
+
+For what runs where, the request path of a browser or CLI operation, where
+session files live, and a code map, see [docs/architecture.md](docs/architecture.md).
 
 ## Scope and limits
 
@@ -99,7 +126,8 @@ when the helper is absent; other local adapters remain independent.
 ├── src/cli/       CLI parser, commands, facade use, and output publication
 ├── src/contracts/ Neutral runtime contracts and validation
 ├── src/host/      Layered local host: root, bootstrap, transport, application, platform
-├── tools/         Verification, reporting, quality, and release utilities
+├── tests/         Contract and integration tests
+├── tools/         Test, verification, reporting, quality, and release utilities
 ├── index.html
 └── package.json
 ```
@@ -107,7 +135,8 @@ when the helper is absent; other local adapters remain independent.
 ## Development and verification
 
 ```sh
-npm run verify           # repository verification
+npm test                 # discover and run tests under tests/
+npm run verify           # repository verification and full Node suite
 npm run check:professional-clones
 npm run report           # summarize the capability catalogs
 npm run release:validate # produce a local inventory receipt
@@ -120,7 +149,7 @@ tag, publish, sign, notarize, or distribute a release.
 
 | Document | Purpose |
 | --- | --- |
-| [Architecture](docs/architecture.md) | Physical host layers and dependency directions |
+| [Architecture](docs/architecture.md) | Runtime overview, user journeys, session storage, host layers, code map |
 | [ADR 0001](docs/decisions/0001-modular-monolith-contracts-bootstrap.md) | Modular-monolith and composition rationale |
 | [ADR 0002](docs/decisions/0002-bounded-runtime-registries.md) | Closed allowlisted dispatch registries |
 | [Capability coverage](docs/capability-coverage.md) | Evidence and limits for capability records |

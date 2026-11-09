@@ -14,6 +14,9 @@ import {
 import {
   INCREMENTAL_BATCH_LINK_PROFILE, normalizeIncrementalBatchGoToLinks,
 } from './pdf-incremental-batch-link-contract.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_PAGE_TREE_DEPTH = 16;
 const MAX_PAGE_TREE_NODES = 256;
@@ -29,11 +32,8 @@ const ACTIVE_ACTIONS = new Set([
   'Rendition', 'Trans', 'GoTo3DView',
 ]);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported() { return failure('UNSUPPORTED_INCREMENTAL_GOTO_LINK_PDF', 'PDF is outside the supported bounded incremental GoTo-link subset.'); }
 function invalidOutput() { return failure('INVALID_INCREMENTAL_GOTO_LINK_OUTPUT', 'Incremental GoTo-link output proof failed.'); }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 function pdfName(value) { return Object.freeze({ type: 'name', value }); }
 function pdfNumber(value) { return Object.freeze({ type: 'number', value, integer: true, raw: String(value) }); }
 function pdfArray(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }

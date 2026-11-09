@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { chmod, lstat, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { HostError } from '../../platform/runtime/host-error.mjs';
@@ -6,10 +5,10 @@ import { createOperationProvenance } from '../../platform/storage/operation-prov
 import { stagePrivateSourceCopy, assertPrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { PDF_JPEG_IMAGE_REPLACEMENT_PROFILE, inspectPdfJpegImageReplacement, writePdfJpegImageReplacement } from './pdf-jpeg-image-replacement-writer.mjs';
 import { decodePng } from '../documents/raster-png-codec.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const MAX_OUTPUT_BYTES = MAX_SOURCE_BYTES + (16 * 1024 * 1024);
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function abort(signal) { if (signal?.aborted) throw signal.reason ?? new Error('JPEG image replacement was cancelled.'); }
 async function assertWorkspace(workspace, allowed) { const names = await readdir(workspace); if (names.some((name) => !allowed.has(name))) fail('PDF_JPEG_IMAGE_REPLACEMENT_WORKSPACE_INVALID', 'Replacement workspace contains unexpected entries.'); for (const name of names) { const stat = await lstat(join(workspace, name)); if (!stat.isFile() || stat.isSymbolicLink()) fail('PDF_JPEG_IMAGE_REPLACEMENT_WORKSPACE_INVALID', 'Replacement workspace contains a non-regular file.'); } }
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }

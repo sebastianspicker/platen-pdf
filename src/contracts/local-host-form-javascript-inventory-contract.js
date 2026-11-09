@@ -1,4 +1,5 @@
 import { PDF_FORM_JAVASCRIPT_INVENTORY_LIMITS, PDF_FORM_JAVASCRIPT_INVENTORY_PROFILE } from './pdf-form-javascript-contract.mjs';
+import { deepFreeze } from './deep-freeze.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const REPORT_KEYS = Object.freeze([
@@ -58,12 +59,6 @@ function validReport(report, sourceSha256) {
     actions.add(action);
   }
   return report.actionLoci.reduce((sum, locus) => sum + locus.scriptBytes, 0) === report.totalScriptBytes;
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 function sameList(left, right) {

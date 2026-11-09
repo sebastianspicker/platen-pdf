@@ -19,6 +19,8 @@ import {
 } from './pdf-page-vector-contract.mjs';
 import { changedId, pageVectorProof, vectorStream } from './pdf-page-vector-proof.mjs';
 import { writeIncrementalPdfPageText as writePageText } from './pdf-page-text-writer.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
 
 const MAX_PAGE_TREE_DEPTH = 16;
 const MAX_PAGE_TREE_NODES = 256;
@@ -56,8 +58,6 @@ function invalidOutput() {
   error.code = 'INVALID_INCREMENTAL_PAGE_VECTOR_OUTPUT';
   return error;
 }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 function pdfNumber(value) { return Object.freeze({ type: 'number', value, integer: true, raw: String(value) }); }
 function pdfArray(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
 function pdfDict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }

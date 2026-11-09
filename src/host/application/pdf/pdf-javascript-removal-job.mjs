@@ -6,9 +6,9 @@ import { executeOfflineSignatureInspection } from './pdf-evidence-parsers.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { promotePdfJavaScriptRemovalArtifact } from './pdf-javascript-removal-artifact.mjs';
 import { MAX_PDF_JAVASCRIPT_REMOVAL_SOURCE_BYTES, PDF_JAVASCRIPT_REMOVAL_AFTER_FILES, PDF_JAVASCRIPT_REMOVAL_BEFORE_FILES, assertPdfJavaScriptRemovalFileIdentity, assertPdfJavaScriptRemovalProof, assertPdfJavaScriptRemovalRendersMatch, assertPdfJavaScriptRemovalWorkspace, inspectPdfJavaScriptRemovalContent, inspectPdfJavaScriptRemovalEnvelope, pdfJavaScriptRemovalContentMatches, pdfJavaScriptRemovalEnvelopeMatches, pdfJavaScriptRemovalFileIdentity, pdfJavaScriptRemovalSourceSupported, readStablePdfJavaScriptRemoval, writePrivatePdfJavaScriptRemovalOutput } from './pdf-javascript-removal-validation.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 function fail(code, message, status = 502) { throw new HostError(code, message, status); }
 function aborted(signal) { if (signal.aborted) throw signal.reason ?? new Error('JavaScript-removal processing was cancelled.'); }
-function overlap(left, right) { return left.buffer === right.buffer && left.byteOffset < right.byteOffset + right.byteLength && right.byteOffset < left.byteOffset + left.byteLength; }
 async function snapshot(poppler, input, workspace, signatureWorkspace, signal, { source = false } = {}) {
   const [envelope, signatures] = await Promise.all([inspectPdfJavaScriptRemovalEnvelope(poppler, input, workspace, signal), executeOfflineSignatureInspection(poppler, { input, nssDirectory: signatureWorkspace, signal })]);
   if (source && !pdfJavaScriptRemovalSourceSupported(envelope, signatures)) fail('PDF_JAVASCRIPT_REMOVAL_SOURCE_UNSUPPORTED', 'JavaScript removal requires an unsigned, unencrypted, form-free PDF with document JavaScript and no XMP, attachments, or URLs.', 422);

@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { chmod, lstat, open, readdir, readFile, writeFile } from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import { join } from 'node:path';
@@ -7,12 +6,11 @@ import { createOperationProvenance } from '../../platform/storage/operation-prov
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { assertWorkspaceQuota } from '../../platform/storage/workspace-job-runtime.mjs';
 import { inspectPdfBatesNumbering, PDF_BATES_NUMBERING_PROFILE, writePdfBatesNumbering } from './pdf-bates-numbering-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 export const MAX_PDF_BATES_NUMBERING_JOB_MS = 120_000;
 export const MAX_PDF_BATES_NUMBERING_SOURCE_BYTES = 32 * 1024 * 1024;
 export const MAX_PDF_BATES_NUMBERING_OUTPUT_BYTES = MAX_PDF_BATES_NUMBERING_SOURCE_BYTES + 512 * 1024;
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined);
-}
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex');
 }
 function samePrivateMetadata(left, right) { return ['dev', 'ino', 'size', 'nlink', 'mode', 'mtimeNs', 'ctimeNs'].every((key) => left[key] === right[key]); }
 async function privateRead(path, size, mode, max) { const h = await open(path, fsConstants.O_RDONLY | (fsConstants.O_NOFOLLOW ?? 0));

@@ -4,9 +4,9 @@ import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { planPdfObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { acroFormDigest, boundedNfcText, inspectClassicAcroForm, requireExactPlain } from './pdf-acroform-validation-core.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_ACROFORM_FILL_SAVE_PROFILE };
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message) { throw failure('INVALID_PDF_ACROFORM_FILL_SAVE', message); }
 function unsupported(message) { throw failure('UNSUPPORTED_PDF_ACROFORM_FILL_SAVE_SOURCE', message); }
 function outputInvalid(message) { throw failure('INVALID_PDF_ACROFORM_FILL_SAVE_OUTPUT', message); }

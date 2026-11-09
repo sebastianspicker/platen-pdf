@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { normalizePdfAcroFormBarcodeRequest, PDF_ACROFORM_BARCODE_LIMITS, PDF_ACROFORM_BARCODE_PROFILE } from './pdf-acroform-barcode-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const PREPARED = new WeakMap();
@@ -27,7 +27,6 @@ function number(value, raw = undefined) { return Object.freeze({ type: 'number',
 function array(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
 function dict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
 function sameRef(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function formatNumber(value) { const rounded = Math.round(value * 1_000_000) / 1_000_000; if (!Number.isFinite(rounded) || Math.abs(rounded) > PDF_ACROFORM_BARCODE_LIMITS.maxCoordinate) invalid('Barcode geometry is outside the bounded range.'); return Object.is(rounded, -0) ? '0' : String(rounded); }
 function numericArray(value, field) { if (value?.type !== 'array' || value.values.length !== 4 || value.values.some((item) => item?.type !== 'number' || !Number.isFinite(item.value))) unsupported(`${field} must be a direct four-number array.`); return value.values.map((item) => item.value); }
 function pageBox(value, field) { const [left, bottom, right, top] = numericArray(value, field); if (!(right > left && top > bottom) || [left, bottom, right, top].some((item) => Math.abs(item) > PDF_ACROFORM_BARCODE_LIMITS.maxCoordinate)) unsupported(`${field} is malformed.`); return Object.freeze({ left, bottom, right, top }); }

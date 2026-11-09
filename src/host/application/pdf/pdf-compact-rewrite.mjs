@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { normalizeClassicPdfObjectValue } from './pdf-classic-object-value.mjs';
 import { verifyClosedClassicPdfOutput } from './pdf-classic-closed-output.mjs';
 import { parseClassicPdfStructure, parsePdfStructure, resolveClassicPdfObject, resolvePdfObject } from './pdf-classic-structure.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
 
 const MAX_OBJECTS = 10_000;
 const MAX_SOURCE_BYTES = 512 * 1024 * 1024;
@@ -13,7 +14,6 @@ function fail(code, message) { const error = new Error(message); error.code = co
 function invalid() { return fail('INVALID_PDF_COMPACT_REWRITE', 'The PDF compact rewrite request is invalid.'); }
 function limited() { return fail('PDF_COMPACT_REWRITE_LIMIT_EXCEEDED', 'The PDF compact rewrite exceeds its fixed safety limits.'); }
 function key(reference) { return `${reference.object}:${reference.generation}`; }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
 function cloneReference(reference) { return Object.freeze({ type: 'ref', object: reference.object, generation: reference.generation }); }
 function sha256(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 

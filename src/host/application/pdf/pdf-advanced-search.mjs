@@ -1,11 +1,11 @@
 import { normalizePdfAdvancedSearch, PDF_ADVANCED_SEARCH_PROFILE } from './pdf-advanced-search-contract.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 export { PDF_ADVANCED_SEARCH_PROFILE };
 
 const MAX_WILDCARD_SPAN = 256;
 const MAX_WILDCARD_TOKENS = 64;
 const MAX_MATCH_STATES = 100_000;
 const MAX_SEARCH_STEPS = 16_000_000;
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message) { return failure('UNSUPPORTED_PDF_ADVANCED_SEARCH', message); }
 function codePoints(value) { return [...value]; }
 function letterNumberUnderscore(value) { return /^[\p{L}\p{N}_]$/u.test(value); }

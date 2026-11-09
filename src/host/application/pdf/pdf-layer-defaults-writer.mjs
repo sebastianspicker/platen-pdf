@@ -10,6 +10,7 @@ import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import {
   PDF_LAYER_DEFAULTS_PROFILE, normalizePdfLayerDefaults,
 } from './pdf-layer-defaults-admission.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_GROUPS = 100;
 const MAX_PAGES = 100;
@@ -24,7 +25,6 @@ const HAZARD_KEYS = new Set([
 ]);
 const HAZARD_TYPES = new Set(['Sig', 'OCMD', 'EmbeddedFile', 'Filespec', 'StructElem', 'Annot']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the supported bounded layer-defaults subset.') {
   return failure('UNSUPPORTED_PDF_LAYER_DEFAULTS_PDF', message);
 }

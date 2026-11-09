@@ -15,6 +15,14 @@ const AEC_METHODS = Object.freeze({
   'aec-materialization': 'materialize',
 });
 
+async function readWorkspaceObject(readJson, request) {
+  const body = await readJson(request, WORKSPACE_JSON_BODY_LIMIT);
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    throw new HostError('INVALID_WORKSPACE_REQUEST', 'Workspace requests require a JSON object.', 400);
+  }
+  return body;
+}
+
 export async function handleDomainCatalogRoute(context) {
   const { pathname, request, response, domainFacade, method, json } = context;
   if (pathname !== '/api/domains') return false;
@@ -49,12 +57,12 @@ export async function handleWorkspaceRoute(context) {
       return true;
     }
     if (request.method === 'PUT') {
-      const body = await readJson(request, WORKSPACE_JSON_BODY_LIMIT);
+      const body = await readWorkspaceObject(readJson, request);
       json(response, 200, { workspace: workspaceState.replaceSnapshot(documentId, body.snapshot, { expectedRevision: body.expectedRevision }) });
       return true;
     }
     if (request.method === 'POST') {
-      const body = await readJson(request, WORKSPACE_JSON_BODY_LIMIT);
+      const body = await readWorkspaceObject(readJson, request);
       const options = { expectedRevision: body.expectedRevision };
       let workspace;
       if (body.action === 'create') workspace = workspaceState.createEntity(documentId, body.namespace, body.entity, options);

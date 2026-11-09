@@ -6,10 +6,10 @@ import { executeOfflineSignatureInspection } from './pdf-evidence-parsers.mjs';
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { promoteIncrementalGoToLinkArtifact } from './pdf-incremental-goto-link-artifact.mjs';
 import { GOTO_LINK_AFTER_FILES, GOTO_LINK_BEFORE_FILES, MAX_INCREMENTAL_GOTO_LINK_SOURCE_BYTES, assertGoToLinkWorkspace, assertIncrementalGoToLinkFileIdentity, assertIncrementalGoToLinkProof, assertIncrementalGoToLinkRendersMatch, incrementalGoToLinkContentMatches, incrementalGoToLinkEnvelopeMatches, incrementalGoToLinkEnvelopeSupported, incrementalGoToLinkFileIdentity, inspectIncrementalGoToLinkContent, inspectIncrementalGoToLinkEnvelope, readStableIncrementalGoToLink, writePrivateIncrementalGoToLinkOutput } from './pdf-incremental-goto-link-validation.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 function fail(code, message, status = 502) { throw new HostError(code, message, status); }
 function aborted(signal) { if (signal.aborted) throw signal.reason ?? new Error('Incremental GoTo-link processing was cancelled.'); }
-function overlap(left, right) { return left.buffer === right.buffer && left.byteOffset < right.byteOffset + right.byteLength && right.byteOffset < left.byteOffset + left.byteLength; }
 async function snapshot(poppler, input, workspace, signatureWorkspace, signal) {
   const [envelope, signatures] = await Promise.all([inspectIncrementalGoToLinkEnvelope(poppler, input, workspace, signal), executeOfflineSignatureInspection(poppler, { input, nssDirectory: signatureWorkspace, signal })]);
   if (!incrementalGoToLinkEnvelopeSupported(envelope, signatures)) fail('INCREMENTAL_GOTO_LINK_SOURCE_UNSUPPORTED', 'Incremental GoTo links require an unsigned, unencrypted PDF without forms, JavaScript, XMP, attachments, or URLs.', 422);

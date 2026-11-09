@@ -1,6 +1,7 @@
 import { lstat, realpath } from 'node:fs/promises';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { runProcess } from '../runtime/process-runner.mjs';
+import { exactObject } from '../../../contracts/exact-object.js';
 
 export const SIGNATURE_TRUST_REQUEST_FILENAME = 'request.json';
 export const SIGNATURE_TRUST_MAX_REQUEST_BYTES = 64 * 1024;
@@ -28,13 +29,6 @@ const HELPER_ERROR_CODES = new Set([
   'SOURCE_MISMATCH', 'DOCUMENT_UNREADABLE', 'RESOURCE_LIMIT',
   'RESPONSE_TOO_LARGE', 'EVALUATION_FAILED',
 ]);
-
-function exactObject(value, keys) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-    && Object.keys(value).length === keys.length
-    && Object.keys(value).every((key) => keys.includes(key));
-}
 
 function absolutePath(value, label) {
   if (typeof value !== 'string' || !isAbsolute(value) || value.includes('\0')) {

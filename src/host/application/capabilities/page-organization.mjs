@@ -5,14 +5,14 @@ import {
 } from './page-organization-composition.mjs';
 import {
   pagesCrop, pagesRotate, pagesPageBoxes, pagesLabelsNumbering, pagesTransitions,
-  pagesResize, pagesInsertBlank,
+  pagesInsertBlank,
 } from './page-organization-mutations.mjs';
 
 export {
   pagesMerge, pagesSplit, pagesExtract, pagesReorder, pagesDelete, pagesInsert,
   pagesReplace, pagesDuplicate, pagesCopyBetweenDocuments, pagesReverseInterleave,
   pagesSplitByRule, pagesCrop, pagesRotate, pagesPageBoxes, pagesLabelsNumbering,
-  pagesTransitions, pagesResize, pagesInsertBlank,
+  pagesTransitions, pagesInsertBlank,
 };
 
 export const handlers = Object.freeze({
@@ -27,7 +27,6 @@ export const handlers = Object.freeze({
   'pages.replace': pagesReplace,
   'pages.duplicate': pagesDuplicate,
   'pages.copy-between-documents': pagesCopyBetweenDocuments,
-  'pages.resize': pagesResize,
   'pages.page-boxes': pagesPageBoxes,
   'pages.labels-numbering': pagesLabelsNumbering,
   'pages.reverse-interleave': pagesReverseInterleave,

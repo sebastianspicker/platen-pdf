@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 
 import { pdfDictionary, pdfReference } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
@@ -15,17 +14,17 @@ import {
   PDF_PAGE_BACKGROUND_PROFILE,
   normalizePdfPageBackground,
 } from './pdf-page-background-admission.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { referenceText } from '../../platform/runtime/reference-text.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const UNSAFE_KEYS = new Set(['A', 'AA', 'AcroForm', 'AF', 'Collection', 'Encrypt', 'EmbeddedFiles', 'Filespec', 'JS', 'JavaScript', 'Metadata', 'Names', 'OCProperties', 'OpenAction', 'Outlines', 'Perms', 'PieceInfo', 'Sig', 'StructTreeRoot', 'XFA', 'Dests', 'Dest', 'Lang', 'ViewerPreferences', 'MarkInfo', 'Tabs', 'StructParents', 'ParentTree', 'RoleMap']);
 const UNSAFE_TYPES = new Set(['Action', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig', 'StructElem', 'XRef', 'ObjStm']);
 const PASSIVE_ANNOTATIONS = new Set(['Text', 'FreeText', 'Stamp', 'Highlight', 'Underline', 'StrikeOut', 'Squiggly', 'Circle', 'Square', 'Line', 'Ink', 'Popup']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalidOutput(message = 'PDF page-background output proof failed.') { return failure('INVALID_PDF_PAGE_BACKGROUND_OUTPUT', message); }
 function unsupported(message = 'PDF is outside the supported bounded solid page-background subset.') { return failure('UNSUPPORTED_PDF_PAGE_BACKGROUND', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameReference(a, b) { return a?.object === b?.object && a?.generation === b?.generation; }
-function referenceText(reference) { return `${reference.object} ${reference.generation} R`; }
 
 function sameValue(a, b) {
   if (!a || !b || a.type !== b.type) return a === b;

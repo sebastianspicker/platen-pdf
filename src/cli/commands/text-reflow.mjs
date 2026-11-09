@@ -1,6 +1,7 @@
 import { basename } from 'node:path';
 import { PDF_TEXT_REFLOW_PROFILE } from '../../contracts/public-wire-identifiers.mjs';
 import { normalizePdfTextReflowRequest } from '../../host/application/pdf/pdf-text-reflow-contract.mjs';
+import { sameJson } from '../../contracts/same-json.js';
 
 const REQUEST_KEYS = Object.freeze([
   'page', 'streamRef', 'lineTokenIndices', 'lineWidth', 'originalTextSha256', 'replacementText',
@@ -45,10 +46,6 @@ function validRequestFile(value) {
     || !/^[\x20-\x7e]+$/u.test(value.replacementText) || /[\\()]/u.test(value.replacementText)
     || value.replacementText.trim() !== value.replacementText || /\s{2,}/u.test(value.replacementText)) return false;
   return true;
-}
-
-function sameJson(left, right) {
-  try { return JSON.stringify(left) === JSON.stringify(right); } catch { return false; }
 }
 
 function validRetainedArtifact(candidate, retained, document) {

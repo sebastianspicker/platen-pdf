@@ -26,17 +26,12 @@ import {
   validateIncrementalRecordRoles,
   verifyIncrementalWrittenRecords,
 } from './pdf-classic-incremental-revision.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const MAX_APPEND_BYTES = 1024 * 1024;
 const deletionDescriptors = new WeakSet();
 const deletionStates = new WeakMap();
 const classicDeletionDescriptors = new WeakMap();
-
-function failure(code, message) {
-  const error = new Error(message);
-  error.code = code;
-  return error;
-}
 
 function invalid() {
   return failure(

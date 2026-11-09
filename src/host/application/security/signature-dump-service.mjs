@@ -9,6 +9,7 @@ import {
   captureBoundedSignatureFifos,
   promoteCapturedSignatureFiles,
 } from './signature-fifo-capture.mjs';
+import { sameIdentity } from '../../platform/runtime/file-identity.mjs';
 
 export const MAX_SIGNATURE_DUMP_BYTES = 1024 * 1024;
 export const MAX_SIGNATURE_DUMP_TOTAL_BYTES = 8 * 1024 * 1024;
@@ -62,11 +63,6 @@ function parseDumpReceipt(stdout, signatureCount) {
     records.push(Object.freeze({ index, filename, size }));
   }
   return Object.freeze(records);
-}
-
-function sameIdentity(left, right) {
-  return left.dev === right.dev && left.ino === right.ino && left.size === right.size
-    && left.mtimeNs === right.mtimeNs && left.ctimeNs === right.ctimeNs;
 }
 
 function sameFileAcrossChmod(left, right) {

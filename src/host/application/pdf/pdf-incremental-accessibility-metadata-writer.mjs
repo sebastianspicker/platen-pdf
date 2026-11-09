@@ -5,8 +5,8 @@ import { planPdfObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { INCREMENTAL_ACCESSIBILITY_METADATA_PROFILE, normalizeIncrementalAccessibilityMetadata } from './pdf-incremental-accessibility-metadata-admission.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported() { return failure('UNSUPPORTED_INCREMENTAL_ACCESSIBILITY_METADATA_PDF', 'PDF is outside the supported bounded incremental accessibility metadata subset.'); }
 function invalidOutput() { return failure('INVALID_INCREMENTAL_ACCESSIBILITY_METADATA_OUTPUT', 'Incremental accessibility metadata output proof failed.'); }
 function sameReference(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }

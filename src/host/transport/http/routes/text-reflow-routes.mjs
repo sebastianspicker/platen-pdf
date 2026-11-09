@@ -1,6 +1,7 @@
 import { HostError } from '../../../platform/runtime/host-error.mjs';
 import { normalizePdfTextReflowRequest, PDF_TEXT_REFLOW_PROFILE } from '../../../application/pdf/pdf-text-reflow-contract.mjs';
 import { scheduleArtifactCleanup } from './artifact-response-lifecycle.mjs';
+import { canonicalTimestamp } from '../../../../contracts/canonical-timestamp.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SHA256 = /^[0-9a-f]{64}$/u;
@@ -21,16 +22,6 @@ function exact(value, keys) {
     && keys.every((key) => Object.hasOwn(descriptors, key)
       && Object.hasOwn(descriptors[key], 'value')
       && descriptors[key].enumerable === true);
-}
-
-function canonicalTimestamp(value) {
-  if (typeof value !== 'string') return false;
-  const parsed = new Date(value);
-  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
-}
-
-function sameJson(left, right) {
-  try { return JSON.stringify(left) === JSON.stringify(right); } catch { return false; }
 }
 
 function validOperation(operation, { documentId, sourceSha256, outputSha256, request }) {

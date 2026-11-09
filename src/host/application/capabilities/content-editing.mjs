@@ -1,4 +1,4 @@
-import { result, requireString } from './support.mjs';
+import { fail, result, requireString } from './support.mjs';
 import { opEditText } from './real-ops.mjs';
 import { editableTextPdf } from './fixtures.mjs';
 import { createHash } from 'node:crypto';
@@ -10,7 +10,6 @@ import {
 } from './content-editing-links-production.mjs';
 import {
   documentMetadataEdit,
-  documentFlattenContent,
 } from './content-editing-document.mjs';
 import { executeDocumentActionsJavascript } from './document-actions-javascript.mjs';
 import { editHeadersFooters } from './edit-headers-footers.mjs';
@@ -65,6 +64,5 @@ export const handlers = Object.freeze({
   },
 
   async 'document.metadata-edit'(ctx = {}) { return documentMetadataEdit(ctx); },
-  async 'document.flatten-content'(ctx = {}) { return documentFlattenContent(ctx); },
   async 'document.actions-javascript'(ctx = {}) { return executeDocumentActionsJavascript(ctx); },
 });

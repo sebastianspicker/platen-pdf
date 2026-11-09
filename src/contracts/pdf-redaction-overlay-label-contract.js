@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { deepFreeze } from './deep-freeze.js';
 
 export const REDACTION_OVERLAY_LABEL_PROFILE = 'local-object-full-page-redaction-overlay-label-v1';
 export const REDACTION_OVERLAY_LABEL_LIMITATIONS = Object.freeze([
@@ -101,12 +102,6 @@ function snapshotJson(value) {
   if (Object.getOwnPropertyDescriptor(Object.prototype, 'toJSON')
     || Object.getOwnPropertyDescriptor(Array.prototype, 'toJSON')) invalid('inherited JSON hooks are not allowed.');
   return snapshot(value, { active: new Set(), items: 0, bytes: 0 });
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 function validLabel(value) {

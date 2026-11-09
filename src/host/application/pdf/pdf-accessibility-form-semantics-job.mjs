@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { chmod, lstat, open, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { HostError } from '../../platform/runtime/host-error.mjs';
@@ -7,11 +6,11 @@ import { createDeadline } from '../../platform/storage/workspace-job-runtime.mjs
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { inspectPdfAccessibilityFormSemantics, writePdfAccessibilityFormSemantics } from './pdf-accessibility-form-semantics-writer.mjs';
 import { PDF_ACCESSIBILITY_FORM_SEMANTICS_PROFILE } from './pdf-accessibility-form-semantics-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACCESSIBILITY_FORM_SEMANTICS_JOB_MS = 120_000;
 export const MAX_PDF_ACCESSIBILITY_FORM_SEMANTICS_SOURCE_BYTES = 32 * 1024 * 1024;
 function host(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function abort(signal) { if (signal?.aborted) host('JOB_CANCELLED', 'Accessible form semantics processing was cancelled.', 499); }
 async function shape(path, expected) { const names = (await readdir(path)).sort(); if (names.join('\0') !== [...expected].sort().join('\0')) host('PDF_ACCESSIBILITY_FORM_SEMANTICS_TAMPERED', 'The private semantics workspace contains unexpected files.'); for (const name of names) { const stat = await lstat(join(path, name)); if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || (stat.mode & 0o077) !== 0) host('PDF_ACCESSIBILITY_FORM_SEMANTICS_TAMPERED', 'The private semantics workspace is unsafe.'); } }
 async function write(path, bytes) { const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); } await chmod(path, 0o400); }

@@ -4,6 +4,7 @@ import { TextDecoder } from 'node:util';
 import { cleanDisplayName, DEFAULT_MAX_PDF_BYTES } from './document-store.mjs';
 import { HostError } from '../runtime/host-error.mjs';
 import { WORKSPACE_NAMESPACES } from './workspace-state.mjs';
+import { isPlainObject } from '../runtime/plain-object.mjs';
 
 export const PROJECT_BUNDLE_SCHEMA_VERSION = 1;
 export const PROJECT_BUNDLE_MAX_BYTES = 600 * 1024;
@@ -22,7 +23,6 @@ const PORTABLE_SOURCE_KEYS = new Set(['displayName', 'mediaType', 'size', 'sha25
 const SHA256 = /^[a-f0-9]{64}$/;
 
 function fail(code, message, status = 400) { throw new HostError(code, message, status); }
-function isPlainObject(value) { return Boolean(value) && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype; }
 function assertExactKeys(value, expected, label) {
   if (!isPlainObject(value) || Object.keys(value).length !== expected.size) fail('PROJECT_BUNDLE_INVALID', `${label} must have the required fields only.`);
   for (const key of expected) if (!Object.hasOwn(value, key)) fail('PROJECT_BUNDLE_INVALID', `${label} is missing required field ${key}.`);

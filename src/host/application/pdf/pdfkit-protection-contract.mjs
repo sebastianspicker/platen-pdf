@@ -3,6 +3,7 @@ import {
   PDFKIT_PROTECTION_PROFILE,
   PDFKIT_PROTECTION_REMOVAL_PROFILE,
 } from '../../../contracts/pdfkit-client-contract-shared.js';
+import { exactObject } from '../../../contracts/exact-object.js';
 
 export { PDFKIT_PROTECTION_PROFILE, PDFKIT_PROTECTION_REMOVAL_PROFILE };
 export const PDFKIT_PROTECTION_LIMITS = Object.freeze({
@@ -26,13 +27,6 @@ const PERMISSION_PROFILES = Object.freeze({
 });
 
 function fail(code, message, status = 400) { throw new HostError(code, message, status); }
-
-function exactObject(value, keys) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-    && Object.keys(value).length === keys.length
-    && Object.keys(value).every((key) => keys.includes(key));
-}
 
 export function normalizeProtectionRequest(value) {
   if (!exactObject(value, ['permissionsProfile', 'ownerPassword', 'userPassword'])) {

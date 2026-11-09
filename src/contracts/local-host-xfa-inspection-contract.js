@@ -1,4 +1,5 @@
 import { PDF_XFA_INSPECTION_LIMITS, PDF_XFA_INSPECTION_PROFILE } from './pdf-xfa-inspection-contract.mjs';
+import { deepFreeze } from './deep-freeze.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const PROOF_KEYS = Object.freeze(['schema', 'profile', 'sourceSha256', 'sourceBytes', 'revisionCount', 'effectiveObjectCount', 'xfaPresent', 'inspection']);
@@ -29,12 +30,6 @@ function validProof(proof, sourceSha256) {
     && integer(proof.sourceBytes, 32, PDF_XFA_INSPECTION_LIMITS.maxSourceBytes)
     && proof.revisionCount === 1 && integer(proof.effectiveObjectCount, 1, PDF_XFA_INSPECTION_LIMITS.maxObjects)
     && typeof proof.xfaPresent === 'boolean' && proof.inspection === 'catalog-and-direct-acroform-key-presence-only';
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 function sameList(left, right) {

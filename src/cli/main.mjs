@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 // Platen CLI entry point.
+import { realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createLocalApplication } from '../host/local-host.mjs';
@@ -151,7 +152,7 @@ export async function runCli(argv, { createApplication = createLocalApplication,
   } finally { await application.cli.close(); }
 }
 
-const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const controller = new AbortController(); let receivedSignal = null;
   const signalHandlers = Object.fromEntries(['SIGINT', 'SIGTERM'].map((name) => [name, () => { receivedSignal ??= name; controller.abort(new Error(`Received ${name}`)); }]));

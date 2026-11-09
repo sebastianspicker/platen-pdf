@@ -5,8 +5,8 @@ the alpha boundary.
 
 ## Architecture and maintenance
 
-- [Architecture](architecture.md) describes the physical host layers, dependency
-  direction, external adapters, and side-effect boundaries.
+- [Architecture](architecture.md) shows what runs where, the browser and CLI
+  request paths, session storage, host layers, CI, and a code map.
 - [ADR 0001](decisions/0001-modular-monolith-contracts-bootstrap.md) records the
   modular-monolith, neutral-contract, and bootstrap decision.
 - [ADR 0002](decisions/0002-bounded-runtime-registries.md) bounds the two

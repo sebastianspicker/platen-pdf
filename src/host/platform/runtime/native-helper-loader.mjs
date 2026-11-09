@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { chmod, lstat, mkdir, open, realpath, unlink } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve } from 'node:path';
+import { sameIdentity } from './file-identity.mjs';
 
 export const MAX_NATIVE_HELPER_BYTES = 64 * 1024 * 1024;
 
@@ -58,11 +59,6 @@ function safeExecutableMetadata(metadata, { exactMode = null } = {}) {
     || (metadata.mode & 0o100n) === 0n || (exactMode !== null && (metadata.mode & 0o777n) !== BigInt(exactMode))) return false;
   const uid = currentUid();
   return uid === null || metadata.uid === uid;
-}
-
-function sameIdentity(left, right) {
-  return left.dev === right.dev && left.ino === right.ino && left.size === right.size
-    && left.mtimeNs === right.mtimeNs && left.ctimeNs === right.ctimeNs;
 }
 
 async function hashOpenMachO(path, { exactMode = null, label } = {}) {

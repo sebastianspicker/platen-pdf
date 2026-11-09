@@ -98,9 +98,8 @@ export class PluginPackageStore {
     });
   }
   async #authorizeAdministration(action) {
-    if (this.#administrationPolicy) {
-      await this.#administrationPolicy.authorizePluginPackageMutation(action);
-    }
+    if (!this.#administrationPolicy) fail('ADMIN_POLICY_REQUIRED', 'Plugin package changes require the local admin policy.', 403);
+    await this.#administrationPolicy.authorizePluginPackageMutation(action);
   }
   async #verifyRegistered(id, version, digest) {
     const verified = await this.#installations.verifyInstallation(digest);

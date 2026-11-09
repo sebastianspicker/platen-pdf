@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary, pdfInteger, pdfReference, pdfStringBytes } from './pdf-classic-syntax.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
 import { CLASSIC_PDF_STRUCTURE_LIMITS, parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
@@ -6,23 +5,23 @@ import { planPdfObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { verifyPdfIncrementalRevision } from './pdf-classic-incremental-revision.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import { PDF_PAGE_LABELS_PROFILE, normalizePdfPageLabels } from './pdf-page-labels-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 export { PDF_PAGE_LABELS_PROFILE };
 
 const MAX_PAGES = 1_000;
 const MAX_SOURCE_BYTES = 32 * 1024 * 1024;
 const UNSAFE_KEYS = new Set(['A', 'AA', 'AcroForm', 'AF', 'ByteRange', 'Collection', 'Encrypt', 'EmbeddedFiles', 'Filespec', 'JS', 'JavaScript', 'Metadata', 'Names', 'OCProperties', 'OpenAction', 'Outlines', 'Perms', 'PieceInfo', 'Sig', 'StructTreeRoot', 'XFA']);
 const UNSAFE_TYPES = new Set(['Action', 'Annot', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig', 'StructElem']);
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the supported bounded page-labels subset.') { return failure('UNSUPPORTED_PDF_PAGE_LABELS_PDF', message); }
 function invalidOutput() { return failure('INVALID_PDF_PAGE_LABELS_OUTPUT', 'PDF page-labels output proof failed.'); }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
 function referenceKey(reference) { return `${reference.object}:${reference.generation}`; }
 function pdfName(value) { return Object.freeze({ type: 'name', value }); }
 function pdfNumber(value) { return Object.freeze({ type: 'number', value, integer: true, raw: String(value) }); }
 function pdfString(value) { return pdfUtf16BeString(value); }
 function pdfArray(values) { return Object.freeze({ type: 'array', values: Object.freeze(values) }); }
 function pdfDict(entries) { return Object.freeze({ type: 'dict', entries: new Map(entries) }); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 function rejectUnsafeValue(value, seen = new Set()) {
   if (!value || typeof value !== 'object' || seen.has(value)) return;

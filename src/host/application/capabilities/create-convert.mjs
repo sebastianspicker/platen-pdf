@@ -1,13 +1,9 @@
 import { structuredTextExport } from '../../../contracts/document-analysis.js';
-import { assertInlineOnlyHtml } from '../documents/conversion-admission.mjs';
 import { HostError } from '../../platform/runtime/host-error.mjs';
-import { extractFallbackText } from '../documents/office-extractor.mjs';
-import { cadSourceToPdf } from './cad-geometry.mjs';
 import { exportImages } from './create-convert-images.mjs';
-import { optimizeCompress, optimizeFastWebView } from './create-convert-optimize.mjs';
+import { optimizeCompress } from './create-convert-optimize.mjs';
 import {
   CREATE_CONVERT_CAPABILITY_IDS,
-  MAX_COMBINE_SOURCES,
   MAX_PAGE_POINTS,
   MIN_PAGE_POINTS,
   blankPdf,
@@ -150,65 +146,6 @@ const handlers = Object.freeze({
     return result('create.postscript-to-pdf', { ...pdf, path: 'local-ps-show-subset' });
   },
 
-  async 'create.multiformat-combine'(context = {}) {
-    const factory = factoryFromContext(context);
-    const sources = Array.isArray(context?.sources) ? context.sources : null;
-    if (!sources || sources.length === 0 || sources.length > MAX_COMBINE_SOURCES) {
-      throw new HostError(
-        'INVALID_MULTIFORMAT_SOURCES',
-        `Multiformat combine requires 1–${MAX_COMBINE_SOURCES} local sources.`,
-        400,
-      );
-    }
-    const pageTexts = [];
-    for (const source of sources) {
-      const kind = String(source?.kind ?? 'text');
-      const bytes = requireBuffer(source?.bytes ?? source?.sourceBytes, 'source.bytes');
-      if (kind === 'pdf' && pdfHeaderOk(bytes)) {
-        pageTexts.push(source.label ? `[PDF ${source.label}]` : '[PDF source]');
-        continue;
-      }
-      if (kind === 'image' || kind === 'png') {
-        const imagePdf = pngBytesToPdf(bytes, { title: source.label ?? 'image' });
-        pageTexts.push(`[Image ${imagePdf.width}x${imagePdf.height} → PDF ${imagePdf.sha256.slice(0, 12)}]`);
-        continue;
-      }
-      if (kind === 'html') {
-        assertInlineOnlyHtml(bytes);
-        pageTexts.push(extractFallbackText(bytes, '.html'));
-        continue;
-      }
-      if (kind === 'office' || kind === 'text') {
-        const extension = String(source.extension ?? '.txt');
-        pageTexts.push(extractFallbackText(bytes, extension));
-        continue;
-      }
-      if (kind === 'postscript' || kind === 'ps') {
-        pageTexts.push(extractPostScriptText(bytes));
-        continue;
-      }
-      if (kind === 'cad') {
-        const cad = cadSourceToPdf(bytes, { title: source.label ?? 'CAD' });
-        pageTexts.push(`[CAD entities=${cad.entityCount} digest=${cad.sha256.slice(0, 12)}]`);
-        continue;
-      }
-      pageTexts.push(bytes.toString('utf8'));
-    }
-    const bytes = factory.createTextPdf({
-      pages: pageTexts,
-      title: context.title ?? 'Multiformat combine',
-    });
-    return result('create.multiformat-combine', {
-      bytes,
-      pageCount: pageTexts.length,
-      size: bytes.length,
-      sha256: digest(bytes),
-      mediaType: 'application/pdf',
-      sourceCount: sources.length,
-      path: 'local-multiformat-pages',
-    });
-  },
-
   async 'export.word'(context = {}) {
     return exportOoxml('export.word', 'word', context);
   },
@@ -292,8 +229,6 @@ const handlers = Object.freeze({
   },
 
   async 'optimize.compress'(context = {}) { return optimizeCompress(context); },
-
-  async 'optimize.fast-web-view'(context = {}) { return optimizeFastWebView(context); },
 });
 
 export { handlers };

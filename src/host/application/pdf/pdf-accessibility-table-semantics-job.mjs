@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { chmod, lstat, open, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { HostError } from '../../platform/runtime/host-error.mjs';
@@ -6,12 +5,12 @@ import { createOperationProvenance } from '../../platform/storage/operation-prov
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { inspectPdfAccessibilityTableSemantics, writePdfAccessibilityTableSemantics } from './pdf-accessibility-table-semantics-writer.mjs';
 import { PDF_ACCESSIBILITY_TABLE_SEMANTICS_PROFILE } from './pdf-accessibility-table-semantics-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_ACCESSIBILITY_TABLE_SEMANTICS_JOB_MS = 120_000;
 export const MAX_PDF_ACCESSIBILITY_TABLE_SEMANTICS_SOURCE_BYTES = 32 * 1024 * 1024;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 function host(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function abort(signal) { if (signal?.aborted) host('JOB_CANCELLED', 'Table semantics processing was cancelled.', 499); }
 async function shape(path, expected) { const names = (await readdir(path)).sort(); if (names.join('\0') !== [...expected].sort().join('\0')) host('PDF_ACCESSIBILITY_TABLE_SEMANTICS_TAMPERED', 'The private table semantics workspace contains unexpected files.'); for (const name of names) { const stat = await lstat(join(path, name)); if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || (stat.mode & 0o077) !== 0) host('PDF_ACCESSIBILITY_TABLE_SEMANTICS_TAMPERED', 'The private table semantics workspace is unsafe.'); } }
 async function write(path, bytes) { const handle = await open(path, 'wx', 0o600); try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); } await chmod(path, 0o400); }

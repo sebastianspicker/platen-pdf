@@ -21,13 +21,12 @@ import {
   normalizeIncrementalMetadata,
 } from './pdf-incremental-metadata-admission.mjs';
 import { pdfUtf16BeString } from './pdf-classic-text-string.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const PDF_FIELDS = Object.freeze([
   ['title', 'Title'], ['author', 'Author'], ['subject', 'Subject'], ['keywords', 'Keywords'],
 ]);
-function failure(code, message) {
-  const error = new Error(message); error.code = code; return error;
-}
 
 function unsupported() {
   return failure('UNSUPPORTED_INCREMENTAL_METADATA_PDF', 'PDF is not in the supported bounded incremental-object form.');
@@ -39,10 +38,6 @@ function invalidOutput() {
 
 function noChange() {
   return failure('INVALID_INCREMENTAL_METADATA', 'Incremental PDF metadata would not change the canonical Info dictionary.');
-}
-
-function sameReference(left, right) {
-  return left.object === right.object && left.generation === right.generation;
 }
 
 function containsMetadataEntry(value) {

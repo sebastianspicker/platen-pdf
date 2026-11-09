@@ -1,9 +1,10 @@
-import { createHash } from 'node:crypto';
 import { PDF_HIDDEN_DATA_SANITIZER_PROFILE } from '../../../contracts/public-wire-identifiers.mjs';
 import { normalizeClassicPdfObjectValue } from './pdf-classic-object-value.mjs';
 import { parseClassicPdfStructure, parsePdfStructure, resolvePdfObject } from './pdf-classic-structure.mjs';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { inspectPdfHiddenDataInventory } from './pdf-hidden-data-inventory.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 export { PDF_HIDDEN_DATA_SANITIZER_PROFILE };
 export const MAX_PDF_HIDDEN_DATA_SANITIZER_SOURCE_BYTES = 256 * 1024 * 1024;
@@ -17,11 +18,9 @@ const REMOVED_KEYS = new Set([
 ]);
 const COUNTS = Object.freeze(['xmpMetadata', 'embeddedFiles', 'javascriptActions', 'actionObjects', 'acroForm', 'xfa', 'optionalContent', 'structTree', 'marked', 'hiddenAnnotations', 'pageThumbnails', 'pieceInfo', 'spiderInfo', 'privateData', 'alternateImages', 'opi']);
 
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function invalid(message = 'The bounded hidden-data sanitizer request is invalid.') { throw failure('INVALID_PDF_HIDDEN_DATA_SANITIZER', message); }
 function unsupported(message = 'The PDF is outside the bounded hidden-data sanitizer subset.') { throw failure('UNSUPPORTED_PDF_HIDDEN_DATA_SANITIZER_SOURCE', message); }
 function outputInvalid(message = 'The hidden-data sanitizer output failed independent verification.') { throw failure('INVALID_PDF_HIDDEN_DATA_SANITIZER_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function key(reference) { return `${reference.object}:${reference.generation}`; }
 function ref(value) { return Object.freeze({ type: 'ref', object: value.object, generation: value.generation }); }
 

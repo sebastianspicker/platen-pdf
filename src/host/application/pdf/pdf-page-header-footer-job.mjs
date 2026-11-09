@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { chmod, open, readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -8,6 +7,7 @@ import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/
 import { PDF_PAGE_HEADER_FOOTER_LIMITS, PDF_PAGE_HEADER_FOOTER_PROFILE } from './pdf-page-header-footer-admission.mjs';
 import { inspectPdfPageHeaderFooter, writePdfPageHeaderFooter } from './pdf-page-header-footer-writer.mjs';
 import { PDF_PAGE_HEADER_FOOTER_LIMITATIONS } from '../../../contracts/pdf-page-header-footer-contract.js';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_PAGE_HEADER_FOOTER_JOB_MS = 120_000;
 export const MAX_PDF_PAGE_HEADER_FOOTER_SOURCE_BYTES = PDF_PAGE_HEADER_FOOTER_LIMITS.maxSourceBytes;
@@ -15,7 +15,6 @@ export const MAX_PDF_PAGE_HEADER_FOOTER_OUTPUT_BYTES = MAX_PDF_PAGE_HEADER_FOOTE
 const CORE = Object.freeze({ writePdfPageHeaderFooter, inspectPdfPageHeaderFooter });
 const IDENTITY = Object.freeze(['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs']);
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'Page header/footer processing was cancelled.', 499); }
 function same(a, b) { return IDENTITY.every((key) => a[key] === b[key]); }
 async function names(workspace) { return (await readdir(workspace, { withFileTypes: true })).map((entry) => entry.name).sort(); }

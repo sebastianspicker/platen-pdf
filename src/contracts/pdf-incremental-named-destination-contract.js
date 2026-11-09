@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const INCREMENTAL_NAMED_DESTINATION_PROFILE = 'local-incremental-named-destination-v1';
 export const INCREMENTAL_NAMED_DESTINATION_VALIDATORS = Object.freeze([
@@ -43,11 +44,6 @@ export function buildIncrementalNamedDestinationMutation(state) {
     throw new Error('Named destination requires an existing page and a 1-64 character ASCII name using letters, numbers, dot, underscore, or hyphen.');
   }
   return Object.freeze(request);
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 function validArtifact(artifact, context) {

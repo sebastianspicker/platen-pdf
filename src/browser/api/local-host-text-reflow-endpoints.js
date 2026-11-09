@@ -2,6 +2,8 @@ import { Buffer } from 'node:buffer';
 import { PlatenError } from '../../contracts/errors.js';
 import { OPAQUE_ID_PATTERN } from '../../contracts/pdfkit-client-contract-shared.js';
 import { PDF_TEXT_REFLOW_PROFILE } from '../../contracts/public-wire-identifiers.mjs';
+import { deepFreeze } from '../../contracts/deep-freeze.js';
+import { canonicalTimestamp } from '../../contracts/canonical-timestamp.js';
 
 export { PDF_TEXT_REFLOW_PROFILE };
 const SHA256 = /^[0-9a-f]{64}$/u;
@@ -55,12 +57,6 @@ function validRequest(value) {
     || value.replacementText.trim() !== value.replacementText
     || /\s{2,}/u.test(value.replacementText)) return false;
   return true;
-}
-
-function canonicalTimestamp(value) {
-  if (typeof value !== 'string') return false;
-  const parsed = new Date(value);
-  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString() === value;
 }
 
 function validOperation(operation, { documentId, sourceSha256, outputSha256, request }) {
@@ -118,12 +114,6 @@ function validProof(proof, { documentId, sourceSha256, request, outputSha256 }) 
     && proof.streamByteLengthPreserved === true && proof.lineCount === request.lineTokenIndices.length
     && Number.isSafeInteger(proof.revisionCount) && proof.revisionCount >= 2
     && proof.changedObjectCount === 1 && typeof documentId === 'string';
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 export function normalizeTextReflowRequest(value) {

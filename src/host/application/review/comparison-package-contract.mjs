@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { isProxy } from 'node:util/types';
 import { HostError } from '../../platform/runtime/host-error.mjs';
 import { validateContentComparisonReceipt } from './comparison-report.mjs';
@@ -9,6 +8,7 @@ import {
   COMPARISON_PACKAGE_EXTENSION, COMPARISON_PACKAGE_MAX_BYTES,
   COMPARISON_PACKAGE_MEDIA_TYPE,
 } from './comparison-package-types.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export { COMPARISON_PACKAGE_EXTENSION, COMPARISON_PACKAGE_MAX_BYTES, COMPARISON_PACKAGE_MEDIA_TYPE };
 export const COMPARISON_PACKAGE_SCHEMA_VERSION = 1;
@@ -21,7 +21,6 @@ export const COMPARISON_PACKAGE_LIMITS = Object.freeze({
 const SHA256 = /^[a-f0-9]{64}$/u;
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 
 export function canonicalComparisonJson(value) {
   if (value === null || typeof value === 'boolean' || typeof value === 'string') return JSON.stringify(value);

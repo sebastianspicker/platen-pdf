@@ -25,6 +25,7 @@ import {
   FULL_PAGE_REDACTION_PROFILE, writeFullPageRedaction,
   FULL_PAGE_REDACTION_BATCH_PROFILE, writeFullPageRedactionBatch,
 } from './pdf-full-page-redaction-writer.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/;
 const MAX_JOB_MS = 120_000;
@@ -51,7 +52,6 @@ export const PDF_FULL_PAGE_REDACTION_VALIDATORS = Object.freeze([
 
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 function abort(signal) { if (signal.aborted) throw signal.reason ?? new Error('Full-page redaction was cancelled.'); }
-function overlap(left, right) { return left.buffer === right.buffer && left.byteOffset < right.byteOffset + right.byteLength && right.byteOffset < left.byteOffset + left.byteLength; }
 function checkedCore(core) { if (!core || CORE_METHODS.some((name) => typeof core[name] !== 'function')) throw new TypeError('PdfFullPageRedactionService requires the raw full-page redaction writer.'); return core; }
 function checkedRequest(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length !== 3

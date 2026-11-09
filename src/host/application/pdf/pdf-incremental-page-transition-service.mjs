@@ -14,6 +14,7 @@ import {
   inspectIncrementalPdfPageTransition,
   writeIncrementalPdfPageTransition,
 } from './pdf-incremental-page-transition-writer.mjs';
+import { overlap } from '../../platform/runtime/buffer-overlap.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const MAX_JOB_MS = 120_000;
@@ -60,11 +61,6 @@ function checkedRequest(core, value) {
   }
 }
 function throwIfAborted(signal) { if (signal.aborted) throw signal.reason ?? new Error('Incremental page-transition processing was cancelled.'); }
-function overlap(left, right) {
-  return left.buffer === right.buffer
-    && left.byteOffset < right.byteOffset + right.byteLength
-    && right.byteOffset < left.byteOffset + left.byteLength;
-}
 async function workspaceShape(workspace, expected) {
   const entries = (await readdir(workspace)).sort();
   if (!isDeepStrictEqual(entries, [...expected].sort())) fail('INCREMENTAL_PAGE_TRANSITION_WORKSPACE_INVALID', 'Page-transition processing changed its private workspace topology.');

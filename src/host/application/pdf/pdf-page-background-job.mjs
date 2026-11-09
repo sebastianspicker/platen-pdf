@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { chmod, open, readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -12,13 +11,13 @@ const PDF_PAGE_BACKGROUND_LIMITATIONS = Object.freeze([
   'The source revision remains the historical prefix; the result is an append-only incremental revision.',
 ]);
 import { inspectPdfPageBackground, writePdfPageBackground } from './pdf-page-background-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_OUTPUT_BYTES = PDF_PAGE_BACKGROUND_LIMITS.maxSourceBytes + (1 * 1024 * 1024);
 const CORE = Object.freeze({ writePdfPageBackground, inspectPdfPageBackground });
 const IDENTITY_KEYS = Object.freeze(['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs']);
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 function abort(signal) { if (signal?.aborted) throw signal.reason ?? new Error('Page-background processing was cancelled.'); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameIdentity(a, b) { return IDENTITY_KEYS.every((key) => a[key] === b[key]); }
 function privateIdentity(stat) { return Object.freeze(Object.fromEntries(IDENTITY_KEYS.map((key) => [key, stat[key]]))); }
 async function readPrivateFile(path, identity, expectedSha256, expectedSize, maximumBytes) {

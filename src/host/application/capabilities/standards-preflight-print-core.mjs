@@ -1,67 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { HostError } from '../../platform/runtime/host-error.mjs';
-import { createBlankPdf, createTextPdf } from '../pdf/pdf-factory.mjs';
-import { PREFLIGHT_PROFILES, serializePreflightReportXml } from '../prepress/preflight-rules.mjs';
-import {
-  PDF_PRINTER_MARKS_PROFILE,
-} from '../pdf/pdf-printer-marks-writer.mjs';
-import { result, fail, requireString, requireBytes, sha256 } from './support.mjs';
-import {
-  assembleBarcodeDecorationPdf,
-} from './specialist-embed-pdf.mjs';
-
-function structuralReview(profile, source, extraFindings = []) {
-  const latin1 = source.toString('latin1');
-  const findings = [
-    { id: 'pdf-header', status: latin1.startsWith('%PDF-') ? 'pass' : 'fail', summary: 'PDF header check' },
-    { id: 'encrypt', status: latin1.includes('/Encrypt') ? 'fail' : 'pass', summary: 'Encryption presence' },
-    { id: 'eof', status: latin1.includes('%%EOF') ? 'pass' : 'indeterminate', summary: 'EOF marker' },
-    ...extraFindings,
-  ];
-  return Object.freeze({
-    kind: 'standards-review',
-    profile,
-    findings: Object.freeze(findings),
-    conforming: findings.every((f) => f.status !== 'fail'),
-    certified: false,
-    authority: 'local-structural-only-v1',
-  });
-}
-
-export function standardsPdfA(ctx = {}) {
-  const source = ctx.sourcePdf ? requireBytes(ctx.sourcePdf, 'sourcePdf') : createBlankPdf({ pages: 1 });
-  const report = structuralReview('pdf-a', source, [{ id: 'pdfa-note', status: 'indeterminate', summary: 'Not a certified PDF/A validator result' }]);
-  return result('standards.pdf-a', { method: 'local-standards-pdfa-structural', report, reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex'), certified: false });
-}
-export function standardsPdfX(ctx = {}) {
-  const source = ctx.sourcePdf ? requireBytes(ctx.sourcePdf, 'sourcePdf') : createBlankPdf({ pages: 1 });
-  const report = structuralReview('pdf-x', source, [{ id: 'output-intent-hint', status: latin1Has(source, '/OutputIntent') ? 'pass' : 'indeterminate', summary: 'OutputIntent marker' }]);
-  return result('standards.pdf-x', { method: 'local-standards-pdfx-structural', report, reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex'), certified: false });
-}
-export function standardsPdfUa(ctx = {}) {
-  const source = ctx.sourcePdf ? requireBytes(ctx.sourcePdf, 'sourcePdf') : createBlankPdf({ pages: 1 });
-  const report = structuralReview('pdf-ua', source, [{ id: 'markinfo', status: latin1Has(source, '/MarkInfo') || latin1Has(source, '/StructTreeRoot') ? 'pass' : 'indeterminate', summary: 'Tag structure markers' }]);
-  return result('standards.pdf-ua', { method: 'local-standards-pdfua-structural', report, reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex'), certified: false });
-}
-function reviewStructuralStandard(ctx, profile, capabilityId, method) {
-  const source = ctx.sourcePdf ? requireBytes(ctx.sourcePdf, 'sourcePdf') : createBlankPdf({ pages: 1 });
-  const report = structuralReview(profile, source);
-  return result(capabilityId, { method, report, reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex'), certified: false });
-}
-export function standardsPdfE(ctx = {}) {
-  return reviewStructuralStandard(ctx, 'pdf-e', 'standards.pdf-e', 'local-standards-pdfe-structural');
-}
-export function standardsPdfVt(ctx = {}) {
-  return reviewStructuralStandard(ctx, 'pdf-vt', 'standards.pdf-vt', 'local-standards-pdfvt-structural');
-}
-export function standardsPdfTwo(ctx = {}) {
-  const source = ctx.sourcePdf ? requireBytes(ctx.sourcePdf, 'sourcePdf') : createBlankPdf({ pages: 1 });
-  const version = (source.toString('latin1').match(/%PDF-([0-9.]+)/) || [])[1] || null;
-  const report = structuralReview('pdf-two', source, [{ id: 'version', status: version ? 'pass' : 'fail', summary: 'Declared version ' + (version ?? 'missing') }]);
-  return result('standards.pdf-two', { method: 'local-standards-pdf20-structural', report, version, reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex'), certified: false });
-}
-function latin1Has(buf, s) { return buf.toString('latin1').includes(s); }
+import { serializePreflightReportXml } from '../prepress/preflight-rules.mjs';
+import { fail, sha256 } from './support.mjs';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const PRINT_AUTHORITY = new WeakSet();
@@ -210,6 +151,6 @@ function strictReport(report, profile) {
 
 
 export {
-  SHA256, structuralReview, latin1Has, abort, runtime, authority, retainedBytes,
+  SHA256, abort, runtime, authority, retainedBytes,
   revokeAfterFailure, retainedOutput, boundDocument, strictReport,
 };

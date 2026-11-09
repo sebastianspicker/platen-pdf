@@ -15,9 +15,14 @@ function eventId(action, value) {
 
 async function auditMutation(application, action, subject, identity, runtime) {
   if (typeof application.adminAudit?.append !== 'function') auditUnavailable(runtime);
-  await application.adminAudit.append({
-    eventId: eventId(action, identity), action, subject, outcome: 'succeeded',
-  });
+  try {
+    await application.adminAudit.append({
+      eventId: eventId(action, identity), action, subject, outcome: 'succeeded',
+    });
+  } catch {
+    // The audit only records succeeded events, so it can only be written after the change.
+    runtime.fail('ADMIN_AUDIT_INCOMPLETE', `The ${action} change was applied, but its audit record could not be written.`);
+  }
 }
 
 export async function runPluginPackageCommand(application, command, stdout, signal, runtime) {

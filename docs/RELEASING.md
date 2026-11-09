@@ -3,6 +3,14 @@
 This process prepares a public alpha. It does not authorize a commit, push, tag,
 GitHub release, or artifact publication.
 
+Development is paused. This remains a reference procedure, not an active release
+plan. The prepared Pages workflow allows manual dispatch on `main` only. Before
+any future approved push or reactivation, the owner must switch the repository's
+Pages source from legacy branch publishing to **GitHub Actions**; branch
+publishing can otherwise deploy independently of this workflow. Changing that
+setting is a separate owner action and may require an archive-status decision.
+Generic CI runs only for Dependabot-authored PRs or manual dispatch.
+
 ## Candidate identity
 
 The current candidate is `0.3.0-alpha.1`. Keep these files aligned:

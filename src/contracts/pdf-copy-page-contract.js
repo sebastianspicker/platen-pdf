@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const PDF_COPY_PAGE_PROFILE = 'local-copy-one-page-between-documents-v1';
 export const PDF_COPY_PAGE_VALIDATORS = Object.freeze([
@@ -15,11 +16,6 @@ export const PDF_COPY_PAGE_LIMITATIONS = Object.freeze([
 ]);
 
 const SHA256 = /^[0-9a-f]{64}$/;
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
-}
 
 function validArtifactEnvelope(artifact, context) {
   return exactObject(artifact, [

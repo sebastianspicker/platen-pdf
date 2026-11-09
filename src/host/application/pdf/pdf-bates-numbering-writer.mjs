@@ -1,8 +1,8 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { normalizePdfBatesNumbering, PDF_BATES_NUMBERING_PROFILE } from './pdf-bates-numbering-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 export { PDF_BATES_NUMBERING_PROFILE };
 const MAX_BYTES = 32 * 1024 * 1024;
 // WinAnsi Helvetica has glyph advances below 1.1 em; 1.2 em is a bounded
@@ -16,8 +16,6 @@ throw e;
 function unsupported(message = 'The source is outside the passive Bates-numbering subset.') { error('UNSUPPORTED_PDF_BATES_NUMBERING_SOURCE', message);
 }
 function invalidOutput() { error('INVALID_PDF_BATES_NUMBERING_OUTPUT', 'Bates-numbering output verification failed.');
-}
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex');
 }
 function same(a, b) { return a?.object === b?.object && a?.generation === b?.generation;
 }

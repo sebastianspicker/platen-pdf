@@ -1,8 +1,6 @@
 /**
  * Honest pure professional operations wrapping production writers (no receipt theater).
  */
-import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
-import { createBlankPdf, createTextPdf } from '../pdf/pdf-factory.mjs';
 import { writeFullPageRedaction, FULL_PAGE_REDACTION_PROFILE } from '../pdf/pdf-full-page-redaction-writer.mjs';
 import { preparePdfAcroFormTextField, inspectPdfAcroFormTextField, PDF_ACROFORM_TEXT_FIELD_PROFILE } from '../pdf/pdf-acroform-text-field-writer.mjs';
 import { writeIncrementalAecMeasureDictionary, inspectIncrementalAecMeasureDictionary } from '../pdf/pdf-aec-measure-writer.mjs';
@@ -214,50 +212,5 @@ export function opCompareContent(ctx = {}) {
     runs: diff.runs,
     stats: diff.stats,
     changed: added + deleted > 0,
-  });
-}
-
-/**
- * Pure AES-128-CBC content encryption of stream payloads + Encrypt dictionary for classic simple PDFs.
- * Professional local subset: encrypts every stream body so plaintext secrets are not recoverable by string search.
- */
-export function opSecurityEncryptionAes(ctx = {}) {
-  const plaintextSecret = requireString(ctx.secret ?? 'CONFIDENTIAL-PAYLOAD', 'secret', { min: 4, max: 80 });
-  const source = requireBytes(
-    ctx.sourcePdf ?? ctx.sourceBytes ?? createTextPdf({ text: plaintextSecret, title: 'Sensitive' }),
-    'sourcePdf',
-  );
-  const userPassword = requireString(ctx.userPassword ?? ctx.openPassword ?? 'UserPass12!abc', 'userPassword', { min: 12, max: 32 });
-  const ownerPassword = requireString(ctx.ownerPassword ?? 'OwnerPass12!xyz', 'ownerPassword', { min: 12, max: 32 });
-  if (userPassword === ownerPassword) fail('INVALID_PASSWORD', 'User and owner passwords must differ.', 400);
-
-  // Content encryption: AES-128-CBC over whole PDF with random key; attach envelope metadata.
-  // This is not PDF Standard Security Handler wire format; it is a local professional sealed package
-  // that fails closed without the password and removes plaintext from the sealed bytes.
-  const key = createHash('sha256').update(`v1|${userPassword}|${ownerPassword}`).digest().subarray(0, 16);
-  const iv = randomBytes(16);
-  const cipher = createCipheriv('aes-128-cbc', key, iv);
-  const ciphertext = Buffer.concat([cipher.update(source), cipher.final()]);
-  const header = Buffer.from('%PLATEN-AES128-V1\n', 'utf8');
-  const sealed = Buffer.concat([header, iv, ciphertext]);
-  if (sealed.includes(Buffer.from(plaintextSecret, 'utf8'))) {
-    fail('ENCRYPTION_LEAK', 'Plaintext secret still present in sealed package.', 502);
-  }
-  // Recovery proof with same passwords only.
-  const decipher = createDecipheriv('aes-128-cbc', key, iv);
-  const opened = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-  if (!opened.equals(source)) fail('ENCRYPTION_ROUNDTRIP_FAILED', 'Sealed package did not reopen to source.', 502);
-
-  return result('security.encryption-aes', {
-    method: 'local-aes128-cbc-sealed-package',
-    profile: 'platen-aes128-v1',
-    sourceSha256: digest(source),
-    sealedSha256: digest(sealed),
-    pdf: sealed,
-    bytes: sealed.length,
-    cipher: 'AES-128-CBC',
-    keyBits: 128,
-    plaintextAbsent: true,
-    roundTripOk: true,
   });
 }

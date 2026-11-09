@@ -1,6 +1,7 @@
 import { documentEndpointPath, postJson } from './local-host-endpoint-transport.js';
 import { OPAQUE_ID_PATTERN } from '../../contracts/pdfkit-client-contract-shared.js';
 import { REVIEW_SIDECAR_INSPECTION_KIND, REVIEW_SIDECAR_STATUS_KIND } from '../../contracts/public-wire-identifiers.mjs';
+import { deepFreeze } from '../../contracts/deep-freeze.js';
 
 export { REVIEW_SIDECAR_INSPECTION_KIND, REVIEW_SIDECAR_STATUS_KIND };
 const SHA256 = /^[a-f0-9]{64}$/u;
@@ -134,12 +135,6 @@ function validatedResult(result, valid, message) {
   let clone;
   try { clone = structuredClone(result); } catch { invalid(message); }
   return deepFreeze(clone);
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 export function validateReviewSidecarStatusResult(result, request) {

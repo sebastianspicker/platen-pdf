@@ -1,9 +1,9 @@
-import { createHash } from 'node:crypto';
 import { pdfDictionary } from './pdf-classic-syntax.mjs';
 import { parseClassicPdfStructure, resolveClassicPdfObject } from './pdf-classic-structure.mjs';
 import { pendingClassicObjectReference, planClassicObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { tokenizePdfContentStream } from './pdf-content-stream-tokenizer.mjs';
 import { normalizePdfPageHeaderFooter, PDF_PAGE_HEADER_FOOTER_APPEARANCE, PDF_PAGE_HEADER_FOOTER_LIMITS, PDF_PAGE_HEADER_FOOTER_PROFILE } from './pdf-page-header-footer-admission.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const FONT_NAME = 'HeaderFooterMono';
 const ISOLATION_PREFIX = Buffer.from('q\n', 'latin1');
@@ -12,7 +12,6 @@ const UNSAFE = new Set(['AcroForm', 'A', 'AA', 'OpenAction', 'JavaScript', 'JS',
 function error(code, message) { const value = new Error(message); value.code = code; return value; }
 function unsupported(message = 'The source is outside the passive page header/footer subset.') { throw error('UNSUPPORTED_PDF_PAGE_HEADER_FOOTER', message); }
 function invalidOutput(message = 'PDF page header/footer output verification failed.') { throw error('INVALID_PDF_PAGE_HEADER_FOOTER_OUTPUT', message); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function same(left, right) { return left?.object === right?.object && left?.generation === right?.generation; }
 function num(value) { return Object.freeze({ type: 'number', value, integer: Number.isSafeInteger(value), raw: String(value) }); }
 function name(value) { return Object.freeze({ type: 'name', value }); }

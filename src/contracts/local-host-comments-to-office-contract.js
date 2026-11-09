@@ -2,6 +2,7 @@ import { PlatenError } from './errors.js';
 import { exactObject } from './pdfkit-client-contract-shared.js';
 
 import { OOXML_WORD_MEDIA_TYPE } from './public-wire-identifiers.mjs';
+import { sameList } from './same-list.js';
 
 export const COMMENTS_TO_OFFICE_PROFILE = 'local-comments-to-office-text-only-v1';
 export const COMMENTS_TO_OFFICE_MEDIA_TYPE = OOXML_WORD_MEDIA_TYPE;
@@ -21,11 +22,6 @@ function contractObject(value, keys) {
     && Reflect.ownKeys(value).length === keys.length
     && keys.every((key) => Object.hasOwn(value, key))
     && Reflect.ownKeys(value).every((key) => typeof key === 'string' && keys.includes(key));
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 function validTimestamp(value) {

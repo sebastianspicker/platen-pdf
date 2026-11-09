@@ -28,11 +28,9 @@ import {
   checkedJavascriptExecution,
   checkedQueueResponse,
   checkedScheduleResult,
-  digestSeed,
   exactResultArray,
   operationSelection,
   plainData,
-  PREFLIGHT_PROFILES,
   requiredService,
   SEQUENCE_OPS,
   sourceBinding,
@@ -99,27 +97,6 @@ export async function automationJobQueueRetry(ctx = {}) {
   });
 }
 
-export function automationWebhooks(ctx = {}) {
-  if (ctx.network === true || ctx.remoteUrl) {
-    fail('NETWORK_FORBIDDEN', 'Remote webhooks forbidden in local mode.', 403);
-  }
-  const event = requireString(ctx.event ?? 'job.completed', 'event', { min: 1, max: 80 });
-  if (!/^[a-z][a-z0-9.-]*$/i.test(event)) fail('INVALID_EVENT', 'event name invalid', 400);
-  const payload = Object.freeze({ event, at: new Date(0).toISOString(), local: true });
-  const delivery = Object.freeze({
-    id: digestSeed('webhook', event),
-    event,
-    transport: 'local-outbox',
-    delivered: true,
-    enqueuedAt: payload.at,
-    payloadSha256: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
-  });
-  return result('automation.webhooks', {
-    method: 'local-automation-webhook-outbox',
-    delivery,
-  });
-}
-
 export async function automationProcessingReports(ctx = {}) {
   const api = requiredService(ctx, 'api');
   if (typeof api.status !== 'function') fail(AUTOMATION_SERVICE_REQUIRED, 'Automation API status is unavailable.', 503);
@@ -151,39 +128,5 @@ export async function automationProcessingReports(ctx = {}) {
     report,
     reportSha256: createHash('sha256').update(JSON.stringify(report)).digest('hex'),
     localOnly: true,
-  });
-}
-
-export function automationPreflightServer(ctx = {}) {
-  if (ctx.network === true || ctx.remoteUrl) {
-    fail('NETWORK_FORBIDDEN', 'Remote preflight servers forbidden in local mode.', 403);
-  }
-  const profile = requireString(ctx.profile ?? 'print-review', 'profile', { min: 1, max: 40 }).toLowerCase();
-  if (!PREFLIGHT_PROFILES.has(profile)) {
-    fail('INVALID_PROFILE', `profile must be one of: ${[...PREFLIGHT_PROFILES].join(', ')}`, 400);
-  }
-  return result('automation.preflight-server', {
-    method: 'local-automation-preflight-service',
-    profile,
-    accepted: true,
-    localService: true,
-    serviceId: digestSeed('preflight', profile).slice(0, 16),
-  });
-}
-
-export function automationBatchPrint(ctx = {}) {
-  const copies = Number.isSafeInteger(ctx.copies) ? ctx.copies : 1;
-  if (copies < 1 || copies > 100) fail('INVALID_COPIES', 'copies', 400);
-  const docs = Array.isArray(ctx.documents)
-    ? ctx.documents.map(String).slice(0, 50)
-    : ['a.pdf'];
-  if (docs.length < 1) fail('INVALID_DOCUMENTS', 'documents required', 400);
-  const plannedSheets = docs.length * copies;
-  return result('automation.batch-print', {
-    method: 'local-automation-batch-print-plan',
-    copies,
-    documents: Object.freeze([...docs]),
-    documentCount: docs.length,
-    plannedSheets,
   });
 }

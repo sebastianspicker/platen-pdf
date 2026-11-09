@@ -7,11 +7,11 @@ import { tokenizePdfContentStream } from './pdf-content-stream-tokenizer.mjs';
 import { resolvePdfPageTree } from './pdf-page-tree-resolver.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import { normalizePdfTextReflowRequest, PDF_TEXT_REFLOW_PROFILE } from './pdf-text-reflow-contract.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const UNSAFE_KEYS = new Set(['A', 'AA', 'AcroForm', 'Annots', 'ByteRange', 'Collection', 'Encrypt', 'EmbeddedFiles', 'F', 'Filespec', 'FS', 'JS', 'JavaScript', 'MarkInfo', 'Metadata', 'Names', 'OC', 'OCProperties', 'OpenAction', 'ParentTree', 'Outlines', 'Perms', 'PresSteps', 'RoleMap', 'StructParents', 'StructTreeRoot', 'URI', 'XFA']);
 const UNSAFE_TYPES = new Set(['Action', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig', 'StructElem', 'StructTreeRoot']);
 const UNSAFE_ACTIONS = new Set(['GoTo', 'GoToR', 'GoToE', 'Launch', 'URI', 'SubmitForm', 'ResetForm', 'ImportData', 'JavaScript', 'SetOCGState', 'Rendition']);
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'PDF is outside the bounded text-reflow subset.') { throw failure('UNSUPPORTED_PDF_TEXT_REFLOW', message); }
 function invalidOutput(message = 'PDF text-reflow output proof failed.') { throw failure('INVALID_PDF_TEXT_REFLOW_OUTPUT', message); }
 function digest(value) { return createHash('sha256').update(value).digest('hex'); }

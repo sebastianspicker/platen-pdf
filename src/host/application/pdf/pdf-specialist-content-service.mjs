@@ -1,12 +1,11 @@
-import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { HostError } from '../../platform/runtime/host-error.mjs';
 import { PDF_SPECIALIST_CONTENT_PROFILE, inspectPdfSpecialistContent } from './pdf-specialist-content-inventory.mjs';
 import { normalizePdfSpecialistContent } from './pdf-specialist-content-contract.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 const MAX_SOURCE_BYTES = 64 * 1024 * 1024;
 function host(code, message, status = 502, cause) { return new HostError(code, message, status, cause ? { cause } : undefined); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function abort(signal) { if (signal?.aborted) throw host('JOB_CANCELLED', 'Specialist-content inspection was cancelled.', 499, signal.reason); }
 function freeze(value) { if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value; for (const child of Object.values(value)) freeze(child); return Object.freeze(value); }
 export const PDF_SPECIALIST_CONTENT_LIMITATIONS = Object.freeze(['Read-only inventory only; no extraction, playback, scripting, authoring, or safety/conformance claim.', 'Payload bytes, names, text, and filesystem paths are omitted from the privacy-minimal result.', 'Malformed, aliased, cyclic, filtered, or resource-ambiguous specialist content is rejected rather than guessed.']);

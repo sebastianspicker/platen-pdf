@@ -1,5 +1,6 @@
 import { PlatenError } from './errors.js';
 import { exactObject, OPAQUE_ID_PATTERN } from './pdfkit-client-contract-shared.js';
+import { sameList } from './same-list.js';
 
 export const ANNOTATION_FLATTEN_PROFILE = 'local-square-annotation-flatten-v1';
 export const ANNOTATION_FLATTEN_VALIDATORS = Object.freeze([
@@ -52,11 +53,6 @@ export function buildAnnotationFlattenMutation(state) {
     throw new Error('Flattening requires the sole inspected annotation to be a source-bound square annotation at index 0.');
   }
   return Object.freeze({ target: Object.freeze(target) });
-}
-
-function sameList(value, expected) {
-  return Array.isArray(value) && value.length === expected.length
-    && value.every((entry, index) => entry === expected[index]);
 }
 
 function validArtifact(artifact, context) {

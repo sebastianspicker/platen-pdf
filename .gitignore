@@ -101,7 +101,6 @@ Thumbs.db
 /agent.md
 /agents.md
 /CLAUDE.md
-/tests/
 /native/pdfkit-helper/Tests/
 /CODEX.md
 /GEMINI.md
@@ -131,3 +130,13 @@ Thumbs.db
 /.screenshots/
 /screenshots-local/
 /recordings/
+
+# Local maintenance records and agent scratch.
+/.agents/
+/.ai/
+/scratchpad/
+/*_LEDGER.md
+/*_ledger.md
+/ALPHA_AUDIT*.md
+/ALPHA_IMPLEMENTATION_LEDGER.md
+/ALPHA_PR_DESCRIPTION.md

@@ -1,4 +1,4 @@
-import { fail, requireBytes, requireString, result, sha256 } from './support.mjs';
+import { fail, requireBytes, result, sha256 } from './support.mjs';
 import { diffTokens } from '../review/comparison-algorithms.mjs';
 import { createTextPdf } from '../pdf/pdf-factory.mjs';
 import { parseClassicPdfStructure, parsePdfStructure } from '../pdf/pdf-classic-structure.mjs';
@@ -170,17 +170,6 @@ export const handlers = Object.freeze({
       reportSha256: compared.reportSha256,
       semanticValidation: 'validated-content-comparison-receipt',
       limitations: Object.freeze(['Text-showing PDF content streams only; graphics, layout, and rendering differences are not asserted by this local subset.']),
-    });
-  },
-  async 'compare.cross-format'(ctx = {}) {
-    const left = requireString(ctx.leftText ?? 'alpha', 'leftText');
-    const right = requireString(ctx.rightText ?? 'alpha', 'rightText');
-    const diff = diffTokens(left, right);
-    return result('compare.cross-format', {
-      familyId: FAMILY,
-      method: 'local-cross-format-text-compare',
-      stats: diff.stats,
-      changed: (diff.stats.added + diff.stats.deleted) > 0,
     });
   },
   async 'compare.report-export'(ctx = {}) {

@@ -7,6 +7,7 @@ import { createOperationProvenance } from '../../platform/storage/operation-prov
 import { assertPrivateSourceCopy, stagePrivateSourceCopy } from '../../platform/storage/private-source-copy.mjs';
 import { PDF_PAGE_WATERMARK_LIMITS, PDF_PAGE_WATERMARK_PROFILE } from './pdf-page-watermark-contract.mjs';
 import { inspectPdfPageWatermark, writePdfPageWatermark } from './pdf-page-watermark-writer.mjs';
+import { digest } from '../../platform/runtime/digest.mjs';
 
 export const MAX_PDF_PAGE_WATERMARK_JOB_MS = 120_000;
 export const MAX_PDF_PAGE_WATERMARK_SOURCE_BYTES = PDF_PAGE_WATERMARK_LIMITS.maxSourceBytes;
@@ -15,7 +16,6 @@ const CORE = Object.freeze({ writePdfPageWatermark, inspectPdfPageWatermark });
 const IDENTITY_KEYS = Object.freeze(['dev', 'ino', 'size', 'mtimeNs', 'ctimeNs']);
 function fail(code, message, status = 502, cause) { throw new HostError(code, message, status, cause ? { cause } : undefined); }
 function abort(signal) { if (signal?.aborted) fail('JOB_CANCELLED', 'Page watermarking was cancelled.', 499); }
-function digest(bytes) { return createHash('sha256').update(bytes).digest('hex'); }
 function sameIdentity(a, b) { return IDENTITY_KEYS.every((key) => a[key] === b[key]); }
 function privateIdentity(stat) { return Object.freeze(Object.fromEntries(IDENTITY_KEYS.map((key) => [key, stat[key]]))); }
 async function readPrivateFile(path, identity, expectedSha256, expectedSize, maximumBytes) {

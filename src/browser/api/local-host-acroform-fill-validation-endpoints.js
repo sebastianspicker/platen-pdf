@@ -2,6 +2,7 @@ import { isProxy } from 'node:util/types';
 import { documentEndpointPath, postJson } from './local-host-endpoint-transport.js';
 import { OPAQUE_ID_PATTERN } from '../../contracts/pdfkit-client-contract-shared.js';
 import { PDF_ACROFORM_FILL_SAVE_PROFILE, PDF_ACROFORM_VALIDATION_PROFILE } from '../../contracts/public-wire-identifiers.mjs';
+import { deepFreeze } from '../../contracts/deep-freeze.js';
 
 export { PDF_ACROFORM_FILL_SAVE_PROFILE, PDF_ACROFORM_VALIDATION_PROFILE };
 export const PDF_ACROFORM_FILL_SAVE_KIND = 'pdf-acroform-fill-save';
@@ -186,12 +187,6 @@ function validValidationResult(result, context) {
     && result.valid === (result.errors.length === 0)
     && dense(result.limitations, VALIDATION_LIMITATIONS.length, VALIDATION_LIMITATIONS.length)
     && JSON.stringify(result.limitations) === JSON.stringify(VALIDATION_LIMITATIONS) && result.localOnly === true;
-}
-
-function deepFreeze(value) {
-  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
-  for (const child of Object.values(value)) deepFreeze(child);
-  return Object.freeze(value);
 }
 
 function validatedResult(result, valid, message) {

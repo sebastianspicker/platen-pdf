@@ -2,9 +2,7 @@
  * Document-authoring professional handlers (bookmarks, OCG, watermarks, …).
  */
 import { result, requireString, requireBytes, sha256, fail } from './support.mjs';
-import { createBlankPdf } from '../pdf/pdf-factory.mjs';
 import { writeClassicOutlinePdf } from './classic-structure-pdf.mjs';
-import { assemblePageOpsPdf } from './page-ops-pdf.mjs';
 import {
   writeClassicNamedDestinationsPdf,
   writeClassicOcgPdf,
@@ -14,7 +12,6 @@ import {
   writeClassicBatesPdf,
 } from './document-author-pdf.mjs';
 import { createPdfPortfolio } from './portfolio-pdf.mjs';
-import { writeInertPageAnnotation } from './inert-annotation-writer.mjs';
 import {
   executeRetainedMetadataEdit,
   metadataRequest,
@@ -204,39 +201,5 @@ export function documentMetadataEdit(ctx = {}) {
     pdf: built.bytes,
     bytes: built.bytes.length,
     applied: true,
-  });
-}
-
-export function documentFlattenContent(ctx = {}) {
-  const source = requireBytes(ctx.sourcePdf ?? ctx.sourceBytes ?? createBlankPdf({ pages: 1 }), 'sourcePdf');
-  let annotated = source;
-  try {
-    annotated = writeInertPageAnnotation(source, {
-      subtype: 'Text',
-      contents: 'TO_FLATTEN',
-      page: 1,
-      rect: [72, 700, 120, 740],
-    }).bytes;
-  } catch {
-    annotated = source;
-  }
-  const built = assemblePageOpsPdf({
-    title: 'Flattened',
-    pages: [{
-      marker: 'FLATTENED_CONTENT',
-      text: `Flattened view of ${sha256(annotated).slice(0, 12)}`,
-    }],
-  });
-  if (built.bytes.toString('latin1').includes('/Annots')) {
-    fail('FLATTEN_ANNOTS_PRESENT', 'Flattened export still has /Annots.', 502);
-  }
-  return result('document.flatten-content', {
-    familyId: FAMILY,
-    method: 'local-flatten-content-no-annots',
-    sourceSha256: sha256(source),
-    outputSha256: built.outputSha256,
-    pdf: built.bytes,
-    bytes: built.bytes.length,
-    flattened: true,
   });
 }

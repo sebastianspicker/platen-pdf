@@ -5,6 +5,7 @@ import { planPdfObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { verifyPdfIncrementalRevision } from './pdf-classic-incremental-revision.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import { INCREMENTAL_NAMED_DESTINATION_PROFILE, normalizeIncrementalNamedDestination } from './pdf-incremental-named-destination-admission.mjs';
+import { sameReference } from '../../platform/runtime/same-reference.mjs';
 
 const CATALOG_REJECTED = new Set(['Dests', 'OpenAction', 'AA', 'AcroForm', 'AF', 'Collection', 'Metadata', 'Outlines', 'Perms', 'URI']);
 const UNSAFE_KEYS = new Set([
@@ -15,7 +16,6 @@ const UNSAFE_KEYS = new Set([
 function error(code, message) { const result = new Error(message); result.code = code; return result; }
 function unsupported() { return error('UNSUPPORTED_INCREMENTAL_NAMED_DESTINATION_PDF', 'PDF is outside the supported bounded incremental named-destination subset.'); }
 function invalidOutput() { return error('INVALID_INCREMENTAL_NAMED_DESTINATION_OUTPUT', 'Incremental named-destination output proof failed.'); }
-function sameReference(left, right) { return left.object === right.object && left.generation === right.generation; }
 function referenceKey(reference) { return `${reference.object}:${reference.generation}`; }
 function pdfName(value) { return Object.freeze({ type: 'name', value }); }
 function pdfString(value) { return Object.freeze({ type: 'string', format: 'literal', bytes: Buffer.from(value, 'ascii') }); }

@@ -6,11 +6,11 @@ import { tokenizePdfContentStream } from './pdf-content-stream-tokenizer.mjs';
 import { visitPdfObjects } from './pdf-structure-inspection.mjs';
 import { planPdfObjectTransaction } from './pdf-classic-object-transaction.mjs';
 import { TAGGED_PDF_REMEDIATION_PROFILE, normalizeTaggedPdfRemediationRequest } from './pdf-tagged-remediation-contract.mjs';
+import { failure } from '../../platform/runtime/coded-error.mjs';
 
 const HAZARD_KEYS = new Set(['A', 'AA', 'AcroForm', 'AF', 'Annots', 'ByteRange', 'Collection', 'Dests', 'EF', 'EmbeddedFiles', 'JS', 'Metadata', 'Names', 'OC', 'OCG', 'OCGs', 'OCProperties', 'OpenAction', 'Perms', 'PieceInfo', 'PresSteps', 'RichMediaContent', 'StructTreeRoot', 'StructParents', 'StructParent', 'ParentTree', 'XFA']);
 const HAZARD_TYPES = new Set(['Action', 'Annot', 'EmbeddedFile', 'Filespec', 'OCG', 'OCMD', 'Sig', 'StructElem', 'StructTreeRoot', 'XRef', 'ObjStm']);
 const HAZARD_SUBTYPES = new Set(['3D', 'FileAttachment', 'Movie', 'PS', 'Projection', 'RichMedia', 'Screen', 'Sound', 'XML']);
-function failure(code, message) { const error = new Error(message); error.code = code; return error; }
 function unsupported(message = 'The PDF is outside the bounded tagged-PDF remediation subset.') { return failure('UNSUPPORTED_TAGGED_PDF_REMEDIATION_PDF', message); }
 function invalidOutput() { return failure('INVALID_TAGGED_PDF_REMEDIATION_OUTPUT', 'Tagged-PDF remediation output proof failed.'); }
 function ref(object, generation = 0) { return Object.freeze({ type: 'ref', object, generation }); }

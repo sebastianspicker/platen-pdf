@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 import { HostError } from '../../platform/runtime/host-error.mjs';
+import { deepFreeze } from '../../../contracts/deep-freeze.js';
+export { deepFreeze } from '../../../contracts/deep-freeze.js';
 
 export const UNIT_METERS = Object.freeze({ mm: 0.001, cm: 0.01, m: 1, in: 0.0254, ft: 0.3048 });
 export const SHA256 = /^[a-f0-9]{64}$/;
@@ -22,4 +24,3 @@ function sourceUnit(displayUnit) { return displayUnit.endsWith('2') ? displayUni
 export function stableNumber(value) { return Number(value.toPrecision(15)); }
 export function displayValue(siValue, displayUnit) { if (displayUnit === 'count') return siValue; const factor = UNIT_METERS[sourceUnit(displayUnit)]; return stableNumber(displayUnit.endsWith('2') ? siValue / (factor * factor) : siValue / factor); }
 export function quantity(kind, points, metersPerPdfPoint) { if (kind === 'count') return points.length; if (kind === 'distance') return stableNumber(points.slice(1).reduce((total, point, index) => total + distance(points[index], point), 0) * metersPerPdfPoint); if (kind === 'perimeter') return stableNumber(points.reduce((total, point, index) => total + distance(point, points[(index + 1) % points.length]), 0) * metersPerPdfPoint); return stableNumber(polygonArea(points) * metersPerPdfPoint * metersPerPdfPoint); }
-export function deepFreeze(value) { if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value; for (const child of Object.values(value)) deepFreeze(child); return Object.freeze(value); }

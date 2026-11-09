@@ -3,6 +3,7 @@ import { constants as fsConstants } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { HostError } from '../../platform/runtime/host-error.mjs';
 import { PDF_JPEG_IMAGE_PROFILE } from './pdf-jpeg-image-writer.mjs';
+import { exactObject } from '../../../contracts/exact-object.js';
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const OPAQUE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -11,13 +12,6 @@ const MAX_PAGE = 10_000;
 
 function host(code, message, status = 400, cause) {
   return new HostError(code, message, status, cause ? { cause } : undefined);
-}
-
-function exactObject(value, keys) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-    && Object.getPrototypeOf(value) === Object.prototype
-    && Object.keys(value).length === keys.length
-    && Object.keys(value).every((key) => keys.includes(key));
 }
 
 function normalizeRect(value) {

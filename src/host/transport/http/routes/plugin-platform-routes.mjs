@@ -67,7 +67,7 @@ async function handlePackageSelectionRoute({ pathname, request, response, url, p
   }
   if ([...url.searchParams].length) throw new HostError('INVALID_PARAMETER', 'Plugin rollback does not accept query parameters.', 400);
   if (processing.signal.aborted) throw new HostError('JOB_CANCELLED', 'Plugin rollback was cancelled.', 499);
-  await pluginPackages.rollback(target.id);
+  await pluginPackages.restorePreviousSelection(target.id);
   json(response, 200, selectionResult('rollback', pluginPackages.getPlugin(target.id)));
   return true;
 }

@@ -17,7 +17,10 @@ try {
 
 async function shutdown() {
   if (!application) return;
-  await new Promise((resolveClose) => application.server.close(resolveClose));
+  const closed = new Promise((resolveClose) => application.server.close(resolveClose));
+  // Dropping in-flight requests aborts their engine processes, so shutdown never waits on a long job.
+  application.server.closeAllConnections();
+  await closed;
   await (application.close?.() ?? application.store.dispose());
   application = null;
 }
